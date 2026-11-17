@@ -15,8 +15,9 @@ including the touchscreen. The UI is in Estonian, English and Japanese. Use at y
 | | | |
 |---|---|---|
 | ![home](docs/img/home.png) | ![search](docs/img/search.png) | ![entry](docs/img/entry.png) |
-| ![furigana](docs/img/aozora-furigana.png) | ![look-up cursor](docs/img/lookup-cursor.png) | ![markdown](docs/img/markdown.png) |
-| ![library](docs/img/library.png) | ![pictures](docs/img/pictures-jpeg.png) | ![update dictionary](docs/img/update-progress.png) |
+| ![furigana](docs/img/aozora-furigana.png) | ![HTML ruby](docs/img/html-ruby.png) | ![look-up cursor](docs/img/lookup-cursor.png) |
+| ![markdown](docs/img/markdown.png) | ![library](docs/img/library.png) | ![pictures](docs/img/pictures-jpeg.png) |
+| ![picture in a sentence](docs/img/pictures-png.png) | ![unsupported picture](docs/img/pictures-fallback.png) | ![update dictionary](docs/img/update-progress.png) |
 
 ## Features
 
