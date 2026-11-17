@@ -75,7 +75,10 @@ X(ReadFileFail,     "Faili ei saa lugeda (puudub või üle 4 MB)",
 X(NotUtf8,          "Fail pole UTF-8 kodeeringus.\nKonverteeri arvutis:\niconv -f SHIFT_JIS -t UTF-8",
                     "File is not in UTF-8.\nConvert on the PC:\niconv -f SHIFT_JIS -t UTF-8",
                     "UTF-8 ではありません。\nPCで変換してください:\niconv -f SHIFT_JIS -t UTF-8")
-X(DocumentDefault,  "Dokument", "Document", "ドキュメント")
+X(ProgressiveJpeg,  "{name} on progressiivne JPEG,\nmida see seade näidata ei oska.\nSalvesta see arvutis baseline JPG'na. Näide: :\nconvert vana.jpg -interlace none uus.jpg",
+                    "{name} is a progressive JPEG,\nwhich this device cannot show.\nSave it as baseline on the PC. Example:\nconvert old.jpg -interlace none new.jpg",
+                    "{name} はプログレッシブJPEGで、\nこの端末では表示できません。\nPCでベースラインJPEGに変換してください。例：\nconvert old.jpg -interlace none new.jpg")
+X(DocumentDefault,  "Fail", "File", "ファイル")
 X(FolderHints,      "↑↓ vali   Enter ava   BS üles/tagasi", "↑↓ select   Enter open   BS up/back",
                     "↑↓ 選択   Enter 開く   BS 上へ/戻る")
 X(FolderEmpty,      "(tühi kaust)", "(empty folder)", "(空のフォルダ)")
@@ -120,6 +123,7 @@ X(FeedsHints,       "Enter ava   a lisa voog   BS tagasi",
                     "Enter 開く   a 追加   BS 戻る")
 X(AddFeedTitle,     "Lisa voog", "Add feed", "フィード追加")
 X(AddFeedPrompt,    "Voo URL (RSS või Atom):", "Feed URL (RSS or Atom):", "フィードURL (RSSまたはAtom):")
+X(ArticleDefault,   "Artikkel", "Article", "記事")
 X(FeedNoArticles,   "Voos ei leitud artikleid", "No articles found in feed", "記事が見つかりません")
 X(DownloadingHost,  "Laadin alla\n{host}…", "Downloading\n{host}…", "ダウンロード中\n{host}…")
 X(WebPrompt,        "Aadress (https:// lisatakse, kui puudub):",

@@ -66,7 +66,8 @@ bool probeJpeg(hal::File& f, Image& img) {
             if (f.read(sof, 5) != 5) break;
             img.h = static_cast<uint16_t>(be16(sof + 1));
             img.w = static_cast<uint16_t>(be16(sof + 3));
-            if (marker == 0xC2) img.problem = "progressive JPEG (save it as baseline)";
+            img.progressive = (marker == 0xC2);
+            if (img.progressive) img.problem = "progressive JPEG detected";
             else if (marker != 0xC0 && marker != 0xC1) img.problem = "unsupported JPEG type";
             return true;
         }

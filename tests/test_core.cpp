@@ -592,7 +592,8 @@ static void testImages() {
     rt::resolveImages(doc, "/tdeckjisho/books/pictures.md");
     using F = rt::ImageFormat;
     CHECK(doc.images[0].format == F::Jpeg && doc.images[0].w == 120 && doc.images[0].h == 75);
-    CHECK(doc.images[1].w == 0 && doc.images[1].problem.find("progressive") != std::string::npos);
+    CHECK(doc.images[1].w == 0 && doc.images[1].progressive);
+    CHECK(!doc.images[0].progressive);
     CHECK(doc.images[2].format == F::Png && doc.images[2].w == 55);
     CHECK(doc.images[3].format == F::Bmp && doc.images[3].h == 30);
     CHECK(doc.images[4].format == F::Qoi && doc.images[4].w == 40);

@@ -117,6 +117,9 @@ std::unique_ptr<Screen> feedScreen(const std::string& name, std::string_view xml
         [feed, title](App& app, int i) {
             rt::Doc doc;
             rt::feedItemToDoc(feed->items[i], title, doc);
+            // A feed without a <title>, listed in feeds.txt without a name ("|url"):
+            // the article's own fallback, not DocumentScreen's "File".
+            if (doc.title.empty()) doc.title = tr(Str::ArticleDefault);
             app.push(std::make_unique<DocumentScreen>(std::move(doc)));
         },
         /*twoLine=*/true);
@@ -274,12 +277,18 @@ void openFile(App& app, const std::string& path) {
             if (isImageFile(path)) {
                 // A one-picture document. The src is relative to the picture's own
                 // folder, so it resolves to the file itself; a picture that can't be
-                // shown (progressive JPEG, too big) gets the usual message in its place.
+                // shown (too big, damaged) gets the usual icon + caption in its place.
                 rt::Doc doc;
                 rt::Builder b(doc);
                 b.image(fileNameAsSrc(basename(path)), basename(path));
                 doc.title = basename(path);
                 rt::resolveImages(doc, path);
+                // Inside a .md/.html file the caption (alt text) tells what is missing;
+                // here the caption is just the file name, so say what is wrong and how to fix it.
+                if (doc.images[0].progressive) {
+                    err = fmt(Str::ProgressiveJpeg, {{"name", basename(path)}});
+                    return nullptr;
+                }
                 return std::make_unique<DocumentScreen>(std::move(doc), path);
             }
             std::string data;

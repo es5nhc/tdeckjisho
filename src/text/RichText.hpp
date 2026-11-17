@@ -102,7 +102,8 @@ struct Image {
     std::string path;            // resolved SD path, "" if not loadable
     ImageFormat format = ImageFormat::Unknown;
     uint16_t w = 0, h = 0;       // pixels; 0 = cannot be shown
-    std::string problem;         // why not, e.g. "progressive JPEG"
+    std::string problem;         // why not, for the log (English, not shown on screen)
+    bool progressive = false;    // a progressive JPEG: the one problem the user can easily fix
 };
 
 struct Doc {
