@@ -48,7 +48,7 @@ X(HomeHints,        "↑↓ vali   Enter ava",
                     "↑↓ select   Enter open",
                     "↑↓ 選択   Enter 開く")
 X(HomeDictionary,   "Sõnaraamat", "Dictionary", "辞書")
-X(HomeQuiz,         "Viktoriin", "Quiz", "クイズ")
+X(HomeQuiz,         "Harjutustest", "Quiz", "クイズ")
 X(HomeLibrary,      "Teek", "Library", "本棚")
 X(HomeNews,         "RSS lugeja", "RSS reader", "RSS")
 X(HomeWeb,          "Veeb", "Web", "ウェブ")
@@ -63,8 +63,8 @@ X(SetHints,         "↑↓ vali   ← → muuda   Enter ava   BS",
                     "↑↓ select   ← → change   Enter open   BS",
                     "↑↓ 選択   ← → 変更   Enter 開く   BS")
 X(SetBrightness,    "Ekraani heledus", "Screen brightness", "画面の明るさ")
-X(SetSleep,         "Ekraan kustub", "Screen off after", "画面オフまで")
-X(SetWifiOff,       "Wi-Fi välja, kui võrku pole", "Disable Wi-Fi if no network", "圏外でWi-Fiオフにする")
+X(SetSleep,         "Ekraan kustub automaatselt", "Screen off after", "画面オフまで")
+X(SetWifiOff,       "Wi-Fi välja võrgu puududes", "Disable Wi-Fi if no network", "圏外でWi-Fiをオフにする")
 X(SetLanguage,      "Keel", "Language", "言語")
 X(SetWifi,          "Wi-Fi seaded", "Wi-Fi settings", "Wi-Fi設定")
 X(SetTouch,         "Puutetest", "Touch test", "タッチテスト")

@@ -153,7 +153,7 @@ docs/              how it works and how to change it
 Most of this code was written with an AI assistant (Anthropic's Claude), first as a
 step-by-step teaching prototype and then reshaped into this project. The test suite and
 the sanitizer builds are how its behaviour is checked; read the code with that in mind.
-The Estonian and Japanese UI texts were initially written by the assistant and but have since been reviewed by the developer.
+The UI texts were initially written by the assistant and but have since been reviewed by the developer.
 
 ## Licence
 
