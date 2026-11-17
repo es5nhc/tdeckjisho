@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  A tiny hand-written file in JMdict format, for testing the converter and the
+  SDL build without downloading the real dictionary. Entry numbers 90000xx are
+  made up. The real file: http://ftp.edrdg.org/pub/Nihongo/JMdict_e.gz
+  (JMdict is (c) EDRDG, CC BY-SA 4.0.)
+-->
+<!DOCTYPE JMdict [
+<!ELEMENT JMdict (entry*)>
+<!ENTITY adj-i "adjective (keiyoushi)">
+<!ENTITY adj-na "adjectival nouns or quasi-adjectives (keiyodoshi)">
+<!ENTITY adv "adverb (fukushi)">
+<!ENTITY ctr "counter">
+<!ENTITY exp "expressions (phrases, clauses, etc.)">
+<!ENTITY int "interjection (kandoushi)">
+<!ENTITY n "noun (common) (futsuumeishi)">
+<!ENTITY n-adv "adverbial noun (fukushitekimeishi)">
+<!ENTITY n-t "noun (temporal) (jisoumeishi)">
+<!ENTITY uk "word usually written using kana alone">
+<!ENTITY v1 "Ichidan verb">
+<!ENTITY v5k "Godan verb with 'ku' ending">
+<!ENTITY v5k-s "Godan verb - Iku/Yuku special class">
+<!ENTITY v5m "Godan verb with 'mu' ending">
+<!ENTITY v5r "Godan verb with 'ru' ending">
+<!ENTITY v5u "Godan verb with 'u' ending">
+<!ENTITY vk "Kuru verb - special class">
+<!ENTITY vs "noun or participle which takes the aux. verb suru">
+<!ENTITY vi "intransitive verb">
+<!ENTITY vt "transitive verb">
+<!ENTITY food "food, cooking">
+]>
+<JMdict>
+<entry><ent_seq>9000001</ent_seq>
+<k_ele><keb>食べる</keb><ke_pri>ichi1</ke_pri><ke_pri>news2</ke_pri><ke_pri>nf25</ke_pri></k_ele>
+<k_ele><keb>喰べる</keb></k_ele>
+<r_ele><reb>たべる</reb><re_pri>ichi1</re_pri><re_pri>news2</re_pri><re_pri>nf25</re_pri></r_ele>
+<sense><pos>&v1;</pos><pos>&vt;</pos><gloss>to eat</gloss></sense>
+<sense><gloss>to live on (e.g. a salary)</gloss><gloss>to live off</gloss><gloss>to subsist on</gloss></sense>
+</entry>
+<entry><ent_seq>9000002</ent_seq>
+<k_ele><keb>食べ物</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf15</ke_pri></k_ele>
+<r_ele><reb>たべもの</reb><re_pri>ichi1</re_pri><re_pri>news1</re_pri><re_pri>nf15</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>food</gloss><gloss>provisions</gloss></sense>
+</entry>
+<entry><ent_seq>9000003</ent_seq>
+<k_ele><keb>飲む</keb><ke_pri>ichi1</ke_pri><ke_pri>news2</ke_pri><ke_pri>nf29</ke_pri></k_ele>
+<r_ele><reb>のむ</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&v5m;</pos><pos>&vt;</pos><gloss>to drink</gloss><gloss>to gulp</gloss><gloss>to swallow</gloss></sense>
+<sense><gloss>to take (medicine)</gloss></sense>
+</entry>
+<entry><ent_seq>9000004</ent_seq>
+<k_ele><keb>日本</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf01</ke_pri></k_ele>
+<r_ele><reb>にほん</reb><re_pri>ichi1</re_pri><re_pri>news1</re_pri><re_pri>nf01</re_pri></r_ele>
+<r_ele><reb>にっぽん</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>Japan</gloss></sense>
+</entry>
+<entry><ent_seq>9000005</ent_seq>
+<k_ele><keb>日本語</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf02</ke_pri></k_ele>
+<r_ele><reb>にほんご</reb><re_pri>ichi1</re_pri><re_pri>news1</re_pri><re_pri>nf02</re_pri></r_ele>
+<r_ele><reb>にっぽんご</reb></r_ele>
+<sense><pos>&n;</pos><gloss>Japanese (language)</gloss></sense>
+</entry>
+<entry><ent_seq>9000006</ent_seq>
+<k_ele><keb>辞書</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf18</ke_pri></k_ele>
+<r_ele><reb>じしょ</reb><re_pri>ichi1</re_pri><re_pri>news1</re_pri><re_pri>nf18</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>dictionary</gloss><gloss>lexicon</gloss></sense>
+<sense><gloss>letter of resignation</gloss></sense>
+</entry>
+<entry><ent_seq>9000007</ent_seq>
+<k_ele><keb>本</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf01</ke_pri></k_ele>
+<r_ele><reb>ほん</reb><re_pri>ichi1</re_pri><re_pri>news1</re_pri><re_pri>nf01</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>book</gloss><gloss>volume</gloss><gloss>script</gloss></sense>
+<sense><gloss>this</gloss><gloss>present</gloss></sense>
+<sense><pos>&ctr;</pos><gloss>counter for long, thin objects</gloss></sense>
+</entry>
+<entry><ent_seq>9000008</ent_seq>
+<k_ele><keb>猫</keb><ke_pri>ichi1</ke_pri><ke_pri>news2</ke_pri><ke_pri>nf34</ke_pri></k_ele>
+<r_ele><reb>ねこ</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>cat (esp. the domestic cat)</gloss></sense>
+</entry>
+<entry><ent_seq>9000009</ent_seq>
+<k_ele><keb>犬</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf20</ke_pri></k_ele>
+<r_ele><reb>いぬ</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>dog</gloss></sense>
+<sense><gloss>spy</gloss><gloss>snoop</gloss></sense>
+</entry>
+<entry><ent_seq>9000010</ent_seq>
+<k_ele><keb>水</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf01</ke_pri></k_ele>
+<r_ele><reb>みず</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>water (esp. cool or cold)</gloss></sense>
+</entry>
+<entry><ent_seq>9000011</ent_seq>
+<k_ele><keb>学校</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf02</ke_pri></k_ele>
+<r_ele><reb>がっこう</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>school</gloss></sense>
+</entry>
+<entry><ent_seq>9000012</ent_seq>
+<k_ele><keb>学生</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf03</ke_pri></k_ele>
+<r_ele><reb>がくせい</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>student (esp. a university student)</gloss></sense>
+</entry>
+<entry><ent_seq>9000013</ent_seq>
+<k_ele><keb>先生</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf03</ke_pri></k_ele>
+<r_ele><reb>せんせい</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>teacher</gloss><gloss>instructor</gloss><gloss>master</gloss></sense>
+<sense><gloss>doctor</gloss></sense>
+</entry>
+<entry><ent_seq>9000014</ent_seq>
+<k_ele><keb>東京</keb><ke_pri>news1</ke_pri><ke_pri>nf01</ke_pri></k_ele>
+<r_ele><reb>とうきょう</reb><re_pri>news1</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>Tokyo</gloss></sense>
+</entry>
+<entry><ent_seq>9000015</ent_seq>
+<k_ele><keb>今日</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf02</ke_pri></k_ele>
+<r_ele><reb>きょう</reb><re_pri>ichi1</re_pri></r_ele>
+<r_ele><reb>こんにち</reb></r_ele>
+<sense><pos>&n-t;</pos><pos>&n-adv;</pos><gloss>today</gloss><gloss>this day</gloss></sense>
+<sense><gloss>these days</gloss><gloss>nowadays</gloss></sense>
+</entry>
+<entry><ent_seq>9000016</ent_seq>
+<k_ele><keb>明日</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri></k_ele>
+<r_ele><reb>あした</reb><re_pri>ichi1</re_pri></r_ele>
+<r_ele><reb>あす</reb></r_ele>
+<sense><pos>&n-t;</pos><pos>&n-adv;</pos><gloss>tomorrow</gloss></sense>
+<sense><gloss>near future</gloss></sense>
+</entry>
+<entry><ent_seq>9000017</ent_seq>
+<k_ele><keb>時間</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf01</ke_pri></k_ele>
+<r_ele><reb>じかん</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>time</gloss></sense>
+<sense><gloss>hour</gloss><gloss>hours</gloss></sense>
+</entry>
+<entry><ent_seq>9000018</ent_seq>
+<k_ele><keb>新聞</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf04</ke_pri></k_ele>
+<r_ele><reb>しんぶん</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>newspaper</gloss></sense>
+</entry>
+<entry><ent_seq>9000019</ent_seq>
+<r_ele><reb>ニュース</reb><re_pri>gai1</re_pri><re_pri>news1</re_pri><re_pri>nf04</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>news</gloss></sense>
+</entry>
+<entry><ent_seq>9000020</ent_seq>
+<k_ele><keb>珈琲</keb></k_ele>
+<r_ele><reb>コーヒー</reb><re_pri>gai1</re_pri><re_pri>news2</re_pri></r_ele>
+<sense><pos>&n;</pos><misc>&uk;</misc><gloss>coffee</gloss></sense>
+</entry>
+<entry><ent_seq>9000021</ent_seq>
+<k_ele><keb>勉強</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf13</ke_pri></k_ele>
+<r_ele><reb>べんきょう</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&n;</pos><pos>&vs;</pos><gloss>study</gloss></sense>
+<sense><gloss>diligence</gloss><gloss>working hard</gloss></sense>
+</entry>
+<entry><ent_seq>9000022</ent_seq>
+<k_ele><keb>読む</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf12</ke_pri></k_ele>
+<r_ele><reb>よむ</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&v5m;</pos><pos>&vt;</pos><gloss>to read</gloss></sense>
+<sense><gloss>to recite (e.g. a sutra)</gloss><gloss>to chant</gloss></sense>
+</entry>
+<entry><ent_seq>9000023</ent_seq>
+<k_ele><keb>書く</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf10</ke_pri></k_ele>
+<r_ele><reb>かく</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&v5k;</pos><pos>&vt;</pos><gloss>to write</gloss><gloss>to compose</gloss><gloss>to pen</gloss></sense>
+<sense><gloss>to draw</gloss><gloss>to paint</gloss></sense>
+</entry>
+<entry><ent_seq>9000024</ent_seq>
+<k_ele><keb>見る</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf04</ke_pri></k_ele>
+<r_ele><reb>みる</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&v1;</pos><pos>&vt;</pos><gloss>to see</gloss><gloss>to look</gloss><gloss>to watch</gloss><gloss>to view</gloss></sense>
+<sense><gloss>to examine</gloss><gloss>to check</gloss></sense>
+</entry>
+<entry><ent_seq>9000025</ent_seq>
+<k_ele><keb>行く</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf02</ke_pri></k_ele>
+<r_ele><reb>いく</reb><re_pri>ichi1</re_pri></r_ele>
+<r_ele><reb>ゆく</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&v5k-s;</pos><pos>&vi;</pos><gloss>to go</gloss><gloss>to move (towards)</gloss><gloss>to head (towards)</gloss></sense>
+</entry>
+<entry><ent_seq>9000026</ent_seq>
+<k_ele><keb>来る</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf01</ke_pri></k_ele>
+<r_ele><reb>くる</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&vk;</pos><pos>&vi;</pos><gloss>to come (spatially or temporally)</gloss><gloss>to approach</gloss><gloss>to arrive</gloss></sense>
+</entry>
+<entry><ent_seq>9000027</ent_seq>
+<k_ele><keb>大きい</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf02</ke_pri></k_ele>
+<r_ele><reb>おおきい</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&adj-i;</pos><gloss>big</gloss><gloss>large</gloss><gloss>great</gloss></sense>
+<sense><gloss>loud</gloss></sense>
+</entry>
+<entry><ent_seq>9000028</ent_seq>
+<k_ele><keb>小さい</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf07</ke_pri></k_ele>
+<r_ele><reb>ちいさい</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&adj-i;</pos><gloss>small</gloss><gloss>little</gloss><gloss>tiny</gloss></sense>
+</entry>
+<entry><ent_seq>9000029</ent_seq>
+<k_ele><keb>綺麗</keb><ke_pri>ichi1</ke_pri></k_ele>
+<r_ele><reb>きれい</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&adj-na;</pos><gloss>pretty</gloss><gloss>lovely</gloss><gloss>beautiful</gloss></sense>
+<sense><gloss>clean</gloss><gloss>clear</gloss><gloss>pure</gloss></sense>
+</entry>
+<entry><ent_seq>9000030</ent_seq>
+<k_ele><keb>雨</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf04</ke_pri></k_ele>
+<r_ele><reb>あめ</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>rain</gloss></sense>
+</entry>
+<entry><ent_seq>9000031</ent_seq>
+<k_ele><keb>電車</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf08</ke_pri></k_ele>
+<r_ele><reb>でんしゃ</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>train</gloss><gloss>electric train</gloss></sense>
+</entry>
+<entry><ent_seq>9000032</ent_seq>
+<k_ele><keb>図書館</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf13</ke_pri></k_ele>
+<r_ele><reb>としょかん</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>library</gloss></sense>
+</entry>
+<entry><ent_seq>9000033</ent_seq>
+<k_ele><keb>世界</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf01</ke_pri></k_ele>
+<r_ele><reb>せかい</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>the world</gloss><gloss>society</gloss><gloss>the universe</gloss></sense>
+</entry>
+<entry><ent_seq>9000034</ent_seq>
+<k_ele><keb>今日は</keb></k_ele>
+<r_ele><reb>こんにちは</reb><re_pri>spec1</re_pri></r_ele>
+<sense><pos>&int;</pos><misc>&uk;</misc><gloss>hello</gloss><gloss>good day</gloss><gloss>good afternoon</gloss></sense>
+</entry>
+<entry><ent_seq>9000035</ent_seq>
+<k_ele><keb>有り難う</keb><ke_pri>spec1</ke_pri></k_ele>
+<r_ele><reb>ありがとう</reb><re_pri>spec1</re_pri></r_ele>
+<sense><pos>&int;</pos><misc>&uk;</misc><gloss>thank you</gloss><gloss>thanks</gloss></sense>
+</entry>
+<entry><ent_seq>9000036</ent_seq>
+<k_ele><keb>魚</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf10</ke_pri></k_ele>
+<r_ele><reb>さかな</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>fish</gloss></sense>
+</entry>
+<entry><ent_seq>9000037</ent_seq>
+<k_ele><keb>寿司</keb><ke_pri>news1</ke_pri><ke_pri>nf22</ke_pri></k_ele>
+<r_ele><reb>すし</reb><re_pri>news1</re_pri></r_ele>
+<sense><pos>&n;</pos><field>&food;</field><gloss>sushi</gloss></sense>
+</entry>
+<entry><ent_seq>9000038</ent_seq>
+<k_ele><keb>言葉</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf02</ke_pri></k_ele>
+<r_ele><reb>ことば</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>language</gloss><gloss>dialect</gloss></sense>
+<sense><gloss>word</gloss><gloss>words</gloss><gloss>phrase</gloss></sense>
+</entry>
+<entry><ent_seq>9000039</ent_seq>
+<k_ele><keb>氷菓子</keb></k_ele>
+<r_ele><reb>こおりがし</reb></r_ele>
+<sense><pos>&n;</pos><gloss>ice cream</gloss><gloss>frozen dessert</gloss></sense>
+</entry>
+<entry><ent_seq>9000040</ent_seq>
+<k_ele><keb>今晩は</keb></k_ele>
+<r_ele><reb>こんばんは</reb><re_pri>spec1</re_pri></r_ele>
+<sense><pos>&int;</pos><misc>&uk;</misc><gloss>good evening</gloss></sense>
+</entry>
+<entry><ent_seq>9000041</ent_seq>
+<k_ele><keb>抹茶</keb><ke_pri>news2</ke_pri></k_ele>
+<r_ele><reb>まっちゃ</reb></r_ele>
+<sense><pos>&n;</pos><gloss>matcha</gloss><gloss>powdered green tea</gloss></sense>
+</entry>
+<entry><ent_seq>9000042</ent_seq>
+<k_ele><keb>切手</keb><ke_pri>ichi1</ke_pri><ke_pri>news2</ke_pri></k_ele>
+<r_ele><reb>きって</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>postage stamp</gloss></sense>
+</entry>
+<entry><ent_seq>9000043</ent_seq>
+<k_ele><keb>子</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri></k_ele>
+<r_ele><reb>こ</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>child</gloss></sense>
+</entry>
+<entry><ent_seq>9000044</ent_seq>
+<k_ele><keb>小熊</keb></k_ele>
+<k_ele><keb>子熊</keb></k_ele>
+<r_ele><reb>こぐま</reb></r_ele>
+<sense><pos>&n;</pos><gloss>small bear</gloss><gloss>bear cub</gloss></sense>
+</entry>
+<entry><ent_seq>9000045</ent_seq>
+<k_ele><keb>歯科</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri><ke_pri>nf12</ke_pri></k_ele>
+<r_ele><reb>しか</reb><re_pri>ichi1</re_pri><re_pri>news1</re_pri><re_pri>nf12</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>dentistry</gloss></sense>
+</entry>
+<entry><ent_seq>9000046</ent_seq>
+<k_ele><keb>鹿</keb><ke_pri>news1</ke_pri><ke_pri>nf10</ke_pri></k_ele>
+<r_ele><reb>しか</reb><re_pri>news1</re_pri><re_pri>nf10</re_pri></r_ele>
+<r_ele><reb>シカ</reb></r_ele>
+<sense><pos>&n;</pos><gloss>deer</gloss></sense>
+</entry>
+<entry><ent_seq>9000047</ent_seq>
+<k_ele><keb>熊</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri></k_ele>
+<r_ele><reb>くま</reb><re_pri>ichi1</re_pri><re_pri>news1</re_pri></r_ele>
+<r_ele><reb>クマ</reb></r_ele>
+<sense><pos>&n;</pos><gloss>bear</gloss></sense>
+</entry>
+<entry><ent_seq>9000048</ent_seq>
+<k_ele><keb>親</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri></k_ele>
+<r_ele><reb>おや</reb><re_pri>ichi1</re_pri><re_pri>news1</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>parent</gloss></sense>
+</entry>
+<entry><ent_seq>9000049</ent_seq>
+<k_ele><keb>人</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri></k_ele>
+<r_ele><reb>ひと</reb><re_pri>ichi1</re_pri><re_pri>news1</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>person</gloss></sense>
+</entry>
+<entry><ent_seq>9000050</ent_seq>
+<k_ele><keb>人</keb></k_ele>
+<r_ele><reb>にん</reb></r_ele>
+<sense><pos>&ctr;</pos><gloss>counter for people</gloss></sense>
+</entry>
+<entry><ent_seq>9000051</ent_seq>
+<k_ele><keb>本の</keb><ke_pri>ichi1</ke_pri></k_ele>
+<r_ele><reb>ほんの</reb><re_pri>ichi1</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>mere</gloss></sense>
+</entry>
+<entry><ent_seq>9000052</ent_seq>
+<k_ele><keb>時価</keb><ke_pri>ichi1</ke_pri><ke_pri>news1</ke_pri></k_ele>
+<r_ele><reb>じか</reb><re_pri>ichi1</re_pri><re_pri>news1</re_pri></r_ele>
+<sense><pos>&n;</pos><gloss>current value</gloss></sense>
+</entry>
+</JMdict>

@@ -1,0 +1,6 @@
+# News feeds for TDeckJisho.  One per line:   Name | URL
+# Lines starting with # are ignored. Check that the URLs are still valid –
+# news sites change them from time to time.
+NHK 主要ニュース | https://news.web.nhk/n-data/conf/na/rss/cat0.xml
+ERR News (English) | https://news.err.ee/rss
+ERR Uudised | https://www.err.ee/rss

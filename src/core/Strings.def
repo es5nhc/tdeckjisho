@@ -1,0 +1,286 @@
+// ============================================================================
+//  Strings.def – EVERY user-visible text of the program, in all languages
+// ============================================================================
+//
+//  One row per text:   X(Id,  "Estonian",  "English",  "Japanese")
+//
+//  This file is included TWICE by core/I18n.cpp/.hpp, each time with a different
+//  definition of X (the "X-macro" technique): once to make the enum `Str::Id`,
+//  once to make the table of texts. So a row can never be added to one list and
+//  forgotten in the other, and all three languages of a text sit on one line, so a
+//  missing translation is visible at a glance (and a unit test fails if Estonian or
+//  English is empty).
+//
+//  Rules
+//   * An EMPTY "" means "not translated yet": tr() falls back to English.
+//   * {name} is a placeholder, filled by i18n::fmt(Str::Id, {{"name", value}}).
+//     Word order differs between languages, so never glue sentences from pieces
+//     in code; give the translator the whole sentence with its placeholders.
+//     Every language must use the same placeholders (a unit test checks).
+//   * \n is a line break (message boxes only).
+//   * Japanese text avoids "~" and "\" : the Japanese font draws byte 0x7E as an
+//     overline and 0x5C as a yen sign (JIS X 0201), see docs/03-text-and-reader.md.
+//   * NOT in this file, on purpose: log lines and error texts from the system
+//     (they should look the same in every bug report), file names, settings keys, the
+//     JMdict licence acknowledgement (its wording comes from the EDRDG and stays
+//     English).
+//   * Estonian and Japanese here were written by the assistant and need a native
+//     speaker's review. English is the reference.
+//
+//  The language order (Estonian, English, Japanese) is the order of `enum Lang`.
+// ============================================================================
+
+// ---- common --------------------------------------------------------------------
+X(HintListDefault,  "↑↓ vali   Enter ava   BS tagasi",
+                    "↑↓ select   Enter open   BS back",
+                    "↑↓ 選択   Enter 開く   BS 戻る")
+X(HintBackOnly,     "BS tagasi", "BS back", "BS 戻る")
+X(ListEmpty,        "(tühi)", "(empty)", "(空)")
+X(PleaseWait,       "palun oota…", "please wait…", "お待ちください…")
+X(ErrorLabel,       "Viga:", "Error:", "エラー:")
+X(NoSdCard,         "SD-kaarti pole", "No SD card", "SDカードがありません")
+X(NotConnectedOpenWifi, "Pole ühendatud – ühendu kõigepelt Wi-Fi võrku",
+                        "Not connected – please connect to Wi-Fi first",
+                        "未接続 – Wi-Fiに接続してくださし")
+
+// ---- home menu ----------------
+X(HomeHints,        "↑↓ vali   Enter ava",
+                    "↑↓ select   Enter open",
+                    "↑↓ 選択   Enter 開く")
+X(HomeDictionary,   "Sõnaraamat", "Dictionary", "辞書")
+X(HomeQuiz,         "Viktoriin", "Quiz", "クイズ")
+X(HomeLibrary,      "Teek", "Library", "本棚")
+X(HomeNews,         "RSS lugeja", "RSS reader", "RSS")
+X(HomeWeb,          "Veeb", "Web", "ウェブ")
+X(HomeUpdate,       "Uuenda sõnaraamatut", "Update dictionary", "辞書をアップデート")
+X(HomeDownload,     "Lae sõnaraamat alla", "Download dictionary", "辞書をダウンロード")   // no dictionary yet
+X(HomeWifi,         "Wi-Fi", "Wi-Fi", "Wi-Fi")
+X(HomeLanguage,     "Keel", "Language", "言語")
+X(HomeTouch,       "Puutetest", "Touch test", "タッチテスト")
+X(HomeAbout,        "Teave", "About", "このアプリについて")
+
+// ---- language screen -----------------------------------------------------------
+X(LangTitle,        "Keel", "Language", "言語")
+
+// ---- dictionary entry ------------------------------------------------------------
+X(EntryCommon,      "  ★ sage", "  ★ common", "  ★ 常用")
+X(EntryOtherForms,  "Muud kirjapildid: ", "Other forms: ", "他の表記: ")
+X(EntryReadFail,    "Kirjet ei saa lugeda", "Could not read entry", "項目を読めません")
+
+// ---- library and reader ----------------------------------------------------------
+X(OpeningFile,      "Avan {name}…", "Opening {name}…", "{name} を開いています…")
+X(ReadFileFail,     "Faili ei saa lugeda (puudub või üle 4 MB)",
+                    "Cannot read file (missing, or larger than 4 MB)",
+                    "ファイルを読めません (存在しない、または4MB超)")
+X(NotUtf8,          "Fail pole UTF-8 kodeeringus.\nKonverteeri arvutis:\niconv -f SHIFT_JIS -t UTF-8",
+                    "File is not in UTF-8.\nConvert on the PC:\niconv -f SHIFT_JIS -t UTF-8",
+                    "UTF-8 ではありません。\nPCで変換してください:\niconv -f SHIFT_JIS -t UTF-8")
+X(DocumentDefault,  "Dokument", "Document", "ドキュメント")
+X(FolderHints,      "↑↓ vali   Enter ava   BS üles/tagasi", "↑↓ select   Enter open   BS up/back",
+                    "↑↓ 選択   Enter 開く   BS 上へ/戻る")
+X(FolderEmpty,      "(tühi kaust)", "(empty folder)", "(空のフォルダ)")
+X(FolderCannotOpen, "Ei saa avada: {dir}\nPane .txt / .md / .html failid\nSD-kaardil kausta {books}.",
+                    "Cannot open {dir}\nPut .txt / .md / .html files\ninto {books} on the SD card.",
+                    "{dir} を開けません。\n.txt / .md / .html ファイルを\nSDカードの {books} に入れてください。")
+X(ReaderHints,      "↑↓ rida  ←→ lk  f suurus  r furigana  c kursor  BS",
+                    "↑↓ line  ←→ page  f size  r furigana  c cursor  BS",
+                    "↑↓ 行  ←→ 頁  f 大  r ふりがな  c カーソル  BS")
+X(ReaderHintsLinks, "↑↓ rida  ←→ lk  l lingid  r furigana  c kursor  BS",
+                    "↑↓ line  ←→ page  l links  r furigana  c cursor  BS",
+                    "↑↓ 行  ←→ 頁  l リンク  r ふりがな  c カーソル")
+X(ReaderHintsNoRuby, "↑↓ rida  ←→ lk  f suurus  c kursor  BS",
+                    "↑↓ line  ←→ page  f size  c cursor  BS",
+                    "↑↓ 行  ←→ 頁  f 大  c カーソル  BS")
+X(ReaderHintsLinksNoRuby, "↑↓ rida  ←→ lk  l lingid  f suurus  c kursor  BS",
+                    "↑↓ line  ←→ page  l links  f size  c cursor  BS",
+                    "↑↓ 行  ←→ 頁  l リンク  f 大  c カーソル  BS")
+X(CursorHints,     "←→ täht  ↑↓ rida  Enter otsi  c/BS välju",
+                    "←→ char  ↑↓ line  Enter look up  c/BS exit",
+                    "←→ 文字  ↑↓ 行  Enter 検索  c/BS 終了")
+X(PanelHints,       "↑↓ vali  Enter ava kirje  ←→ liigu  BS sulge",
+                    "↑↓ select  Enter open entry  ←→ move  BS close",
+                    "↑↓ 選択  Enter 項目を開く  ←→ 移動  BS 閉じる")
+X(LookupNothing,    "Sõnaraamatu kirjet pole", "No dictionary entry", "辞書に見つかりません")
+X(LookupNoKanji,    "Kanjide indeks puudub: uuenda sõnaraamatut (Avamenüü → u)",
+                    "No kanji index: update the dictionary (Home → u)",
+                    "漢字索引がありません: 辞書をアップデート (ホーム → u)")
+X(FontSizeToast,    "Kirjasuurus {n}", "Font size {n}", "文字サイズ {n}")
+X(FuriganaOn,       "Furigana sees", "Furigana on", "ふりがな オン")
+X(FuriganaOff,      "Furigana väljas", "Furigana off", "ふりがな オフ")
+X(NoLinks,          "Sellel lehel pole linke", "No links on this page", "リンクがありません")
+X(LinksTitle,       "Lingid ({n})", "Links ({n})", "リンク ({n})")
+
+// ---- news and web ------------------------------------------------------------------
+X(FeedsTitle,       "RSS lugeja", "RSS reader", "RSS")
+X(FeedsEmpty,       "Voogusid pole.\nMuuda SD-kaardil faili {path}\nvõi vajuta lisamiseks 'a'.",
+                    "No feeds.\nEdit {path} on the SD card\nor press 'a' to add one.",
+                    "フィードがありません。\nSDカードの {path} を編集するか、\n'a' で追加できます。")
+X(FeedsHints,       "Enter ava   a lisa voog   BS tagasi",
+                    "Enter open   a add feed   BS back",
+                    "Enter 開く   a 追加   BS 戻る")
+X(AddFeedTitle,     "Lisa voog", "Add feed", "フィード追加")
+X(AddFeedPrompt,    "Voo URL (RSS või Atom):", "Feed URL (RSS or Atom):", "フィードURL (RSSまたはAtom):")
+X(FeedNoArticles,   "Voos ei leitud artikleid", "No articles found in feed", "記事が見つかりません")
+X(DownloadingHost,  "Laadin alla\n{host}…", "Downloading\n{host}…", "ダウンロード中\n{host}…")
+X(WebPrompt,        "Aadress (https:// lisatakse, kui puudub):",
+                    "Address (https:// is added if missing):",
+                    "アドレス (https:// は省略可):")
+X(CantOpen,         "Ei saa avada: {url}", "Can't open: {url}", "開けません: {url}")
+X(LoadingUrl,       "Laen\n{url}", "Loading\n{url}", "読み込み中\n{url}")
+X(PageTruncated,    "[leht lõigati 1,5 MB juures]", "[page truncated at 1.5 MB]",
+                    "[ページは1.5MBで切り捨てました]")
+
+// ---- dictionary search ---------------------------------------------------------------
+X(SearchHints,      "←→ režiim   ↑↓ vali   Enter ava   BS tagasi",
+                    "←→ mode   ↑↓ select   Enter open   BS back",
+                    "←→ モード   ↑↓ 選択   Enter 開く   BS 戻る")
+X(SearchNotFound,   "Sõnaraamatut ei leitud:\n{err}\nAvamenüü → u: Lae sõnaraamat alla",
+                    "Dictionary not found:\n{err}\nHome → u: Download dictionary",
+                    "辞書が見つかりません:\n{err}\nホーム → u: 辞書をダウンロード")
+X(SearchNoResultsRomaji, "Tulemusi pole – see pole romaji.\n← → vahetab režiimi 英和 (inglise) või 自動",
+                         "No results – this is not romaji.\n← → switches to 英和 (English) or 自動",
+                         "結果なし – ローマ字ではありません。\n← → で 英和 (英語) か 自動 に切替")
+X(SearchNoResults,  "Tulemusi pole", "No results", "見つかりません")
+
+// ---- Wi-Fi ---------------------------------------------------------------------------
+X(WifiHints,        "Enter ühenda   s skaneeri   x katkesta   f unusta   BS",
+                    "Enter connect   s scan   x disconnect   f forget   BS back",
+                    "Enter 接続   s スキャン   x 切断   f 削除   BS 戻る")
+X(WifiConnected,    "Ühendatud", "Connected", "接続済み")
+X(WifiConnecting,   "Ühendan…", "Connecting…", "接続中…")
+X(WifiFailed,       "Ühendus ebaõnnestus", "Connection failed", "接続に失敗しました")
+X(WifiNone,         "Pole ühendatud", "Not connected", "未接続")
+X(WifiOpen,         "avatud", "open", "オープン")
+X(WifiSaved,        "salvestatud", "saved", "保存済み")
+X(WifiConnectingTo, "Ühendan: {ssid}…", "Connecting to {ssid}…", "{ssid} に接続中…")
+X(WifiDisconnected, "Ühendus katkestatud", "Disconnected", "切断しました")
+X(WifiForgot,       "Unustatud: {ssid}", "Forgot {ssid}", "{ssid} を削除しました")
+X(WifiConnectedSaved, "Ühendatud · salvestatud", "Connected · saved", "接続済み · 保存しました")
+X(WifiPasswordTitle,  "Wi-Fi parool", "Wi-Fi password", "Wi-Fi パスワード")
+X(WifiPasswordPrompt, "Võrgu {ssid} parool", "Password for {ssid}", "{ssid} のパスワード")
+X(WifiScanning,     "Skaneerin…", "Scanning…", "スキャン中…")
+X(WifiNetworks,     "Võrgud:", "Networks:", "ネットワーク:")
+X(WifiNoNetworks,   "Võrke ei leitud\ns = skaneeri uuesti", "No networks found\ns = scan again",
+                    "ネットワークが見つかりません\ns = 再スキャン")
+
+// ---- text input ----------------------------------------------------------------------------
+X(InputHintsMasked, "Enter OK   BS kustuta   Tab/klikk: näita/peida",
+                    "Enter OK   BS delete   Tab/click: show/hide",
+                    "Enter OK   BS 削除   Tab/クリック: 表示切替")
+X(InputHintsPlain,  "Enter OK   BS kustuta (tühjal: tühista)",
+                    "Enter OK   BS delete (on empty: cancel)",
+                    "Enter OK   BS 削除 (空のとき: 取消)")
+
+// ---- update dictionary ------------------------------------------------------------------------
+X(UpdTitle,         "Sõnaraamatu uuendus", "Update dictionary", "辞書をアップデート")
+X(UpdHintsMenu,     "↑↓ vali   Enter alusta   BS tagasi", "↑↓ select   Enter start   BS back",
+                    "↑↓ 選択   Enter 開始   BS 戻る")
+X(UpdHintsWorking,  "uuendan... BS kaks korda = katkesta", "working... BS twice to cancel",
+                    "処理中… BS 2回で中止")
+X(UpdHintsConfirm,  "BS uuesti = KATKESTA   mõni muu klahv = jätka",
+                    "BS again = CANCEL   any other key = continue",
+                    "もう一度 BS = 中止   他のキー = 続行")
+X(UpdMenuDownload,  "Lae alla {file} (Wi-Fi)", "Download {file} (Wi-Fi)", "{file} をダウンロード (Wi-Fi)")
+X(UpdMenuBuild,     "Ehita failist {name}", "Build from {name}", "{name} から作成")
+X(UpdMenuAddress,   "Allalaadimise aadress...", "Download address...", "ダウンロード先...")
+X(UpdInputTitle,    "Allalaadimise aadress", "Download address", "ダウンロード先")
+X(UpdInputPrompt,   "JMdict_e.gz URL (lihtne http sobib):", "JMdict_e.gz URL (plain http is fine):",
+                    "JMdict_e.gz のURL (httpでも可):")
+X(UpdIntro1,        "EDRDG JMdict → selle seadme enda vorming.", "JMdict from EDRDG → this device's own format.",
+                    "EDRDGのJMdict → この機器専用の形式。")
+X(UpdIntro2,        "Kaustas {dir}/ olevad .gz ja .xml samuti.",
+                    "Files in {dir}/ (.gz or .xml) are listed too.",
+                    "{dir}/ の .gz / .xml も一覧に出ます。")
+X(UpdDownloadFailed, "Allalaadimine ebaõnnestus:\n{err}", "Download failed:\n{err}", "ダウンロードが失敗しました:\n{err}")
+X(UpdCannotStart,   "Ei saa alustada:\n{err}", "Cannot start:\n{err}", "開始できません:\n{err}")
+X(UpdBuildFailed,   "Ehitamine ebaõnnestus:\n{err}", "Build failed:\n{err}", "作成に失敗しました:\n{err}")
+X(UpdCancelled,     "Katkestatud. Eelmine sõnaraamat (kui oli) on muutmata.",
+                    "Cancelled. The previous dictionary (if any) is unchanged.",
+                    "中止しました。以前の辞書は変更されていません。")
+X(UpdDone,          "Sõnaraamat uuendatud.\n{summary}", "Dictionary updated.\n{summary}",
+                    "辞書を更新しました。\n{summary}")
+X(UpdSummary,       "{entries}, {time}", "{entries} in {time}", "{entries}、{time}")
+X(UpdDownloading,   "Laadin alla {name}", "Downloading {name}", "{name} をダウンロード中")
+X(UpdBuilding,      "Ehitan failist {name}", "Building from {name}", "{name} から作成中")
+X(UpdElapsed,       "kulunud {t}", "{t} elapsed", "経過 {t}")
+X(UpdTimeLeft,      "umbes {t} jäänud", "about {t} left", "残り約 {t}")
+X(UpdWifiToSd,      "Wi-Fi → SD-kaart", "Wi-Fi → SD card", "Wi-Fi → SDカード")
+X(UpdKeepOld,       "Praegune sõnaraamat asendatakse alles lõpus.",
+                    "The current dictionary is replaced only at the end.",
+                    "現在の辞書は最後に置き換えられます。")
+X(UpdSleepOk,       "Ekraan võib magama jääda.", "You may let the screen sleep.", "画面は消えても構いません。")
+X(UpdPressAgain,    "Katkestamiseks vajuta uuesti BS", "Press BS again to cancel", "中止するにはもう一度 BS")
+// Plural pair: Estonian and English use the first form for exactly 1, the second otherwise.
+X(EntriesOne,       "{n} kirje", "{n} entry", "{n} 件")
+X(EntriesMany,      "{n} kirjet", "{n} entries", "{n} 件")
+
+// ---- the dictionary builder's phases (DictBuilder::phaseName) ---------------------------------------
+X(PhaseIdle,        "ootel", "idle", "待機中")
+X(PhaseParseGz,     "pakin lahti ja töötlen", "unpacking + parsing", "解凍・解析中")
+X(PhaseParse,       "töötlen", "parsing", "解析中")
+X(PhaseKana,        "sorteerin kana indeksit", "sorting kana index", "かな索引を並べ替え中")
+X(PhaseKanji,       "sorteerin kanji indeksit", "sorting kanji index", "漢字索引を並べ替え中")
+X(PhaseEng,         "sorteerin inglise indeksit", "sorting English index", "英語索引を並べ替え中")
+X(PhaseFinish,      "lõpetan", "finishing", "仕上げ中")
+X(PhaseDone,        "valmis", "done", "完了")
+X(PhaseFailed,      "ebaõnnestus", "failed", "失敗")
+
+// ---- Touch test screen ---------------------------------------------------------------------------
+X(TouchTitle,       "Puutetest", "Touch test", "タッチテスト")
+X(TouchHints,       "Puuduta riste   c puhasta   BS tagasi", "Tap the crosses   c clear   BS back",
+                    "十字をタップ   c 消去   BS 戻る")
+X(TouchNoTap,       "Puuduta ekraani", "Tap the screen", "画面をタップ")
+
+// ---- About screen ------------------------------------------------------------------------------------
+X(AboutDesc,        "Jaapani⇄inglise sõnaraamat, e-raamatu lugeja, RSS-lugeja ja tekstibrauser LilyGO T-Deckile.",
+                    "Japanese⇄English dictionary, e-book reader, RSS reader and text web browser for the LilyGO T-Deck.",
+                    "和英辞書、電子書籍リーダー、RSSリーダー、テキストブラウザ (LilyGO T-Deck用)。")
+X(AboutVersion,     "Versioon {v} (ehitatud {d})", "Version {v} (built {d})", "バージョン {v} (ビルド {d})")
+X(AboutData,        "Sõnaraamatu andmed", "Dictionary data", "辞書データ")
+X(AboutNotInstalled, "Pole paigaldatud. {err}", "Not installed. {err}", "未インストール。{err}")
+X(AboutKeepCurrent, "Palun hoia sõnastikku ajakohasena: Avamenüü → Uuenda sõnaraamatut (u). Autoriandmete fail kaardil: {path}",
+                    "Please keep the dictionary current: Home → Update dictionary (u). Credits file on the card: {path}",
+                    "定期的にアップデートしてください: ホーム → 辞書更新 (u)。クレジットのファイル: {path}")
+X(AboutSystem,      "Süsteem", "System", "システム")
+X(AboutRam,         "Vaba RAM: {i} KB sisemine, {p} / {t} KB PSRAM",
+                    "Free RAM: {i} KB internal, {p} / {t} KB PSRAM",
+                    "空きRAM: 内部 {i} KB、PSRAM {p} / {t} KB")
+X(AboutSd,          "SD-kaart: {state}", "SD card: {state}", "SDカード: {state}")
+X(AboutSdOk,        "OK", "OK", "OK")
+X(AboutSdMissing,   "ei leitud", "not found", "見つかりません")
+X(AboutWifi,        "Wi-Fi: {state}", "Wi-Fi: {state}", "Wi-Fi: {state}")
+X(AboutWifiOff,     "väljas", "off", "オフ")
+X(AboutCredits,     "Tänusõnad", "Credits", "クレジット")
+X(AboutLovyan,      "LovyanGFX graafikakogu (FreeBSD litsents)", "LovyanGFX graphics library (FreeBSD licence)",
+                    "LovyanGFX グラフィックライブラリ (FreeBSDライセンス)")
+X(AboutIpa,         "JapanGothic: IPA Gothic põhjal (IPA Font License v1.0)", "JapanGothic: derived from IPA Gothic (IPA Font License v1.0)",
+                    "JapanGothic: IPAゴシック由来 (IPAフォントライセンスv1.0)")
+X(AboutLicence,     "TDeckJisho programmikood: MIT litsents", "TDeckJisho program code: MIT licence",
+                    "TDeckJisho のプログラム: MITライセンス")
+X(AboutEfont,       "efont Unicode rasterfont (BSD-laadne litsents)", "efont Unicode bitmap fonts (BSD-style licence)",
+                    "efont Unicode ビットマップフォント (BSD系ライセンス)")
+
+// ---- for the unit tests only: shows the fallback to English --------------------------------------------
+X(DemoUntranslated, "Eestikeelne tekst", "English text, no Japanese yet", "")
+
+// ---- quiz screen -----------------------------------------------------------------------------------
+X(QuizTitle,        "Harjutustest {n}/{total}", "Quiz {n}/{total}", "クイズ {n}/{total}")
+X(QuizHintsAsk,     "a-d vali   ↑↓ Enter   BS välju", "a-d answer   ↑↓ Enter   BS quit",
+                    "a-d 回答   ↑↓ Enter   BS 終了")
+X(QuizHintsNext,    "Enter edasi   i kogu kirje   BS välju", "Enter next   i full entry   BS quit",
+                    "Enter 次へ   i 詳細   BS 終了")
+X(QuizHintsDone,    "Lõpetamiseks vajuta Enter", "Press Enter to return to home screen", "Enter - 終了")
+X(QuizAskReading,   "Kuidas seda sõna loetakse?", "How is this word read?", "この言葉の読み方は？")
+X(QuizAskMeaning,   "Mida see sõna tähendab?", "What does this word mean?", "この言葉の意味は？")
+X(QuizAskJapanese,  "Milline jaapani sõna see on?", "Which Japanese word is this?", "これは日本語でどうですか？")
+X(QuizAskKanji,     "Kuidas seda sõna kirjutatakse?", "How is this word written?", "この言葉の漢字はどうですか？")
+X(QuizCorrect,      "Õige!", "Correct!", "正解！")
+X(QuizWrong,        "Vale", "Wrong", "不正解")
+X(QuizScore,        "{score} / {total}", "{score} / {total}", "{score} / {total}")
+X(QuizScoreLine,    "õigeid vastuseid", "correct answers", "正解数")
+X(QuizNoDict,       "Sõnaraamat puudub – lae see esmalt alla",
+                    "No dictionary – download it first",
+                    "辞書がありません。まず辞書をダウンロードしてください")
+X(QuizTooSmall,     "Harjutustesti ei saa teha: sõnu on liiga vähe (väike sõnaraamat või kõik juba selge)",
+                    "Cannot make a quiz: too few words (small dictionary, or all learned)",
+                    "クイズを作れません。単語が足りません（辞書が小さいか、全部覚えました）")

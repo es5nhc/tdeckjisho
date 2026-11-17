@@ -1,0 +1,7 @@
+Miks selles programmis on kaks fonti kasutusel?!
+
+Lihtsalt. Enamiku eesti keelega tuleb ka JapanGothic ilusti toime.
+
+Aga asjad lähevad rööpast välja siis, kui tulevad mängu š ja ž. 
+
+Neid JapanGothic ei mõista, ja need tuleb renderdada eFontJA'ga. 残念！

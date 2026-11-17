@@ -1,0 +1,5 @@
+# Optional: set up Wi-Fi without typing on the device.
+# Copy this file to wifi.txt, one network per line: SSID<TAB>password, most recent first.
+# At the next start TDeckJisho IMPORTS the networks into the device's internal storage
+# and overwrites wifi.txt, so the password does not stay on the SD card.
+MyHomeNetwork	my-secret-password
