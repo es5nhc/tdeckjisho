@@ -177,10 +177,19 @@ itself.
    take ~100 ms.
 2. **Layout** shrinks a picture (never enlarges it) to the text width and at most
    150 px tall (`kMaxImageH`), so the picture and its caption always fit on one screen.
-3. **Drawing** (`src/ui/ImageCache.cpp`) decodes each picture once, at display size,
-   into a sprite. Up to 1 MB of decoded pictures are kept, and the least recently used
+3. **Drawing** (`src/ui/ImageCache.cpp`) decodes each picture once into a sprite at
+   display size. Up to 1 MB of decoded pictures are kept, and the least recently used
    one is thrown out first. Decoding costs 50–150 ms on the device, and copying a cached
    picture about 1 ms.
+
+   LovyanGFX could scale while decoding, but it scales each 8×8 JPEG block separately
+   by picking the nearest pixel, and its JPEG decoder adds a 4×4 **dither** pattern (a
+   fixed brightness offset per pixel, meant to hide banding in 16-bit colour). Both show
+   up as a fine square grid. So `ImageCache` decodes at full size (JPEG at an exact ½,
+   ¼ or ⅛ when that is still big enough) into a temporary 24-bit sprite, subtracts the
+   known dither, and shrinks the whole picture once by averaging the pixels each
+   screen pixel covers (a **box filter**). Only a picture over 768 K pixels at that
+   size skips this and is scaled the old way.
 
 The decoders are LovyanGFX's. They can't do **progressive JPEG**: such a picture shows
 its caption and the reason instead. Save it as baseline JPEG, and shrink big photos on

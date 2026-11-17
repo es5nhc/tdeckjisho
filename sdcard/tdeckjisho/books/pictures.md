@@ -11,7 +11,7 @@ A picture may also sit in the middle of a sentence: here comes that famous sente
 
 ![これはペンです - in BMP)](img/korewapendesu.bmp)
 
-![Same, but (QOI, "Quite OK Image")](img/korewapendesu.qoi)
+![Same, but (QOI, "Quite OK Image"](img/korewapendesu.qoi)
 
 ## And one they don't
 
