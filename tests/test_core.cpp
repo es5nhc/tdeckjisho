@@ -322,6 +322,15 @@ static void testNetPolicy() {
     const auto creds = loadWifiCreds();
     CHECK(creds.size() == 1);
     CHECK_EQ(creds[0].ssid, std::string("Home"));
+
+    // Auto-connect: the strongest SAVED network in range, not simply the first saved one.
+    const std::vector<WifiCred> saved = {{"Home", "h"}, {"Cafe", "c"}, {"Work", "w"}};
+    WifiCred pick;
+    CHECK(pickSavedWifi(saved, {{"Neighbour", -40, true}, {"Work", -80, true}, {"Cafe", -60, true}}, pick));
+    CHECK_EQ(pick.ssid, std::string("Cafe"));
+    CHECK_EQ(pick.password, std::string("c"));
+    CHECK(!pickSavedWifi(saved, {{"Neighbour", -40, true}}, pick));   // away from all of them
+    CHECK(!pickSavedWifi(saved, {}, pick));
 }
 
 static void testLayout() {

@@ -39,33 +39,53 @@ uint32_t g_connectStart = 0;
 bool g_ntpStarted = false;
 constexpr uint32_t kConnectTimeoutMs = 20000;
 
-// Arduino's HTTPClient writes the body into a `Stream`. We want it in a
-// std::string, with a size limit. So we write a tiny Stream subclass – the
-// adapter pattern. Only write() matters; the read side is never used.
-class StringSink : public Stream {
-public:
-    StringSink(std::string& out, size_t limit) : _out(out), _limit(limit) {}
-    bool truncated = false;
+// Send a GET and follow up to 5 redirects BY HAND. HTTPClient can do it, but not
+// from http:// to https:// (that needs a different client object), and every hop
+// must pass our policy (url::redirectProblem). Shared by Fetch and Download.
+//
+// On return `current` is the final URL and, if the result is > 0, `http` holds that
+// response (headers read, body not yet): the caller reads it, then calls http.end().
+// A result <= 0 means failure, with `error` set and `http` already ended.
+// `http10`: ask for HTTP/1.0, so the server sends the body as one plain stream.
+// HTTP/1.1 servers may send it "chunked" (pieces with size headers in between),
+// which only HTTPClient's blocking writeToStream() decodes for us.
+int beginGet(HTTPClient& http, WiFiClient& plain, WiFiClientSecure& secure, std::string& current,
+             const char* userAgent, bool http10, std::string& error) {
+    if (!url::isWebUrl(current)) { error = "refused: not an http(s) address"; return -1; }
+    for (int hop = 0; hop < 5; ++hop) {
+        const bool https = current.rfind("https://", 0) == 0;
+        if (https) {
+            // Fail closed: without trusted roots we cannot check the server.
+            if (kCaBundleCerts == 0) { error = "no CA certificates in this build (see README)"; return -1; }
+            secure.setCACertBundle(kCaBundle);   // verify the server's certificate chain
+        }
+        // `?:` cannot mix WiFiClientSecure and WiFiClient, so pick by reference:
+        WiFiClient& client = https ? static_cast<WiFiClient&>(secure) : plain;
+        http.setTimeout(10000);              // per read, incl. waiting for the headers
+        http.setUserAgent(userAgent);
+        http.setFollowRedirects(HTTPC_DISABLE_FOLLOW_REDIRECTS);
+        http.useHTTP10(http10);
+        const char* keep[] = {"Location", "Content-Type"};
+        http.collectHeaders(keep, 2);       // HTTPClient discards headers unless asked
+        if (!http.begin(client, current.c_str())) { error = "bad URL"; return -1; }
 
-    size_t write(uint8_t b) override { return write(&b, 1); }
-    size_t write(const uint8_t* buf, size_t n) override {
-        if (_out.size() + n > _limit) { truncated = true; return 0; }   // 0 = abort
-        _out.append(reinterpret_cast<const char*>(buf), n);
-        return n;
+        const int code = http.GET();         // BLOCKS: DNS, TCP, TLS, headers
+        if (code <= 0) {
+            error = http.errorToString(code).c_str();
+            http.end();
+            return code < 0 ? code : -1;
+        }
+        const bool redirect = code == 301 || code == 302 || code == 303 || code == 307 || code == 308;
+        if (!redirect || http.header("Location").length() == 0) return code;
+        const std::string next = url::resolve(current, http.header("Location").c_str());
+        http.end();
+        error = url::redirectProblem(current, next);
+        if (!error.empty()) return -1;
+        current = next;
     }
-    // Pure virtual functions of Stream that we must provide:
-    int available() override { return 0; }
-    int read() override { return -1; }
-    int peek() override { return -1; }
-    void flush() override {}
-
-private:
-    std::string& _out;
-    // NOT `_max`: Arduino.h defines a MACRO called _max(a, b), and the
-    // preprocessor would mangle this line before the compiler sees it.
-    // Macros ignore namespaces and scopes – one reason modern C++ avoids them.
-    size_t _limit;
-};
+    error = "too many redirects";
+    return -1;
+}
 
 }  // namespace
 
@@ -115,6 +135,17 @@ std::string wifiIp() { return WiFi.localIP().toString().c_str(); }
 
 bool wifiScanStart() {
     if (WiFi.getMode() == WIFI_OFF) WiFi.mode(WIFI_STA);
+    // The ESP32 cannot scan while it is still trying to JOIN a network:
+    // scanNetworks() then fails at once. And with auto-reconnect on, that
+    // attempt never ends when the saved network is out of range (Arduino-ESP32
+    // calls WiFi.begin() again after every "no AP found"). So a scan request
+    // abandons the attempt. Connected is fine: scanning while connected works.
+    if (WiFi.status() != WL_CONNECTED && g_state != WifiState::Off) {
+        WiFi.setAutoReconnect(false);    // no retry from a queued disconnect event
+        WiFi.disconnect();               // wifioff=false: the radio stays on
+        g_state = WifiState::Off;
+        log("[wifi] connection attempt dropped for a scan\n");
+    }
     // async=true: returns at once; scanComplete() reports progress.
     return WiFi.scanNetworks(/*async=*/true) == WIFI_SCAN_RUNNING;
 }
@@ -129,63 +160,93 @@ int wifiScanPoll(std::vector<WifiNetwork>& out) {
     return n < 0 ? 0 : n;
 }
 
-HttpResult httpGet(const std::string& startUrl, size_t maxBytes) {
-    HttpResult r;
+// ---- Fetch: a page into memory, the body read a few KB per poll() -----------
+struct Fetch::Impl {
+    HTTPClient http;
+    WiFiClient plain;
+    WiFiClientSecure secure;
+    WiFiClient* stream = nullptr;
+    uint32_t lastData = 0;
+    std::string url;
+    uint8_t buf[2048];
+};
+
+Fetch::Fetch() = default;
+Fetch::~Fetch() = default;
+
+void Fetch::start(const std::string& startUrl, size_t maxBytes) {
+    _impl = std::make_unique<Impl>();
+    _result = HttpResult{};
+    _total = 0;
+    _limit = maxBytes;
+    _state = State::Done;                       // until a body is on its way
+    Impl& d = *_impl;
+    d.url = startUrl;
     std::string current = startUrl;
-    if (!url::isWebUrl(current)) { r.error = "refused: not an http(s) address"; return r; }
+    const int code = beginGet(d.http, d.plain, d.secure, current, "TDeckJisho/" JISHO_VERSION " (ESP32; text reader)",
+                              /*http10=*/true, _result.error);
+    _result.status = code;
+    _result.finalUrl = current;
+    if (code <= 0) { log("[http] GET %s -> %s\n", startUrl.c_str(), _result.error.c_str()); return; }
+    _result.contentType = d.http.header("Content-Type").c_str();
+    if (code != 200) {                          // 404 & co: the caller only shows the code
+        d.http.end();
+        log("[http] GET %s -> %d\n", startUrl.c_str(), code);
+        return;
+    }
+    const int size = d.http.getSize();          // -1 = no Content-Length: read until closed
+    if (size > 0) _total = static_cast<size_t>(size);
+    _result.body.reserve(std::min(_total ? _total : 64 * 1024, _limit));
+    d.stream = d.http.getStreamPtr();
+    d.lastData = ::millis();
+    _state = State::Running;
+}
 
-    // We follow redirects OURSELVES (max 5). HTTPClient can do it, but not
-    // from http:// to https:// (that needs a different client object), and
-    // we want to know the final URL to resolve relative links – and to check
-    // every hop against our policy (url::redirectProblem).
-    for (int hop = 0; hop < 5; ++hop) {
-        const bool https = current.rfind("https://", 0) == 0;
-        WiFiClientSecure secure;
-        WiFiClient plain;
-        if (https) {
-            // Fail closed: without trusted roots we cannot check the server.
-            if (kCaBundleCerts == 0) { r.error = "no CA certificates in this build (see README)"; return r; }
-            secure.setCACertBundle(kCaBundle);   // verify the server's certificate chain
+Fetch::State Fetch::poll() {
+    if (_state != State::Running) return _state;
+    Impl& d = *_impl;
+    std::string& body = _result.body;
+    const uint32_t t0 = ::millis();
+    bool finished = false;
+    // Read for at most ~25 ms per call, so the UI keeps drawing.
+    while (::millis() - t0 < 25) {
+        if (_total && body.size() >= _total) { finished = true; break; }
+        const int avail = d.stream->available();
+        if (avail <= 0) {
+            if (!d.stream->connected()) {        // HTTP/1.0: the end of the body = the server closes
+                if (_total && body.size() < _total) { _result.status = -1; _result.error = "connection closed"; }
+                finished = true;
+                break;
+            }
+            if (::millis() - d.lastData > 15000) { _result.status = -1; _result.error = "timeout"; finished = true; break; }
+            return _state;                       // nothing yet: come back next frame
         }
-
-        HTTPClient http;
-        http.setTimeout(15000);
-        http.setUserAgent("TDeckJisho/" JISHO_VERSION " (ESP32; text reader)");
-        http.setFollowRedirects(HTTPC_DISABLE_FOLLOW_REDIRECTS);
-        const char* keep[] = {"Location", "Content-Type"};
-        http.collectHeaders(keep, 2);       // HTTPClient discards headers unless asked
-        // `?:` cannot mix WiFiClientSecure and WiFiClient, so pick by reference:
-        WiFiClient& client = https ? static_cast<WiFiClient&>(secure) : plain;
-        if (!http.begin(client, current.c_str())) { r.error = "bad URL"; return r; }
-
-        const int code = http.GET();
-        r.status = code;
-        r.finalUrl = current;
-        if (code <= 0) {
-            r.error = http.errorToString(code).c_str();
-            http.end();
+        const int n = d.stream->read(d.buf, std::min<size_t>(static_cast<size_t>(avail), sizeof d.buf));
+        if (n <= 0) break;
+        d.lastData = ::millis();
+        if (body.size() + n >= _limit) {          // enough: keep what fits, drop the rest
+            body.append(reinterpret_cast<const char*>(d.buf), _limit - body.size());
+            _result.truncated = true;
+            finished = true;
             break;
         }
-        if (code == 301 || code == 302 || code == 303 || code == 307 || code == 308) {
-            const std::string next = url::resolve(current, http.header("Location").c_str());
-            http.end();
-            r.error = url::redirectProblem(current, next);
-            if (!r.error.empty()) { r.status = -1; break; }
-            current = next;
-            continue;
-        }
-        r.contentType = http.header("Content-Type").c_str();
-        if (code == 200) {
-            StringSink sink(r.body, maxBytes);
-            http.writeToStream(&sink);     // also decodes "chunked" transfers
-            r.truncated = sink.truncated;
-        }
-        http.end();
-        break;
+        body.append(reinterpret_cast<const char*>(d.buf), n);
     }
-    log("[http] GET %s -> %d, %u bytes, heap %u\n", startUrl.c_str(), r.status,
-        static_cast<unsigned>(r.body.size()), static_cast<unsigned>(ESP.getFreeHeap()));
-    return r;
+    if (!finished) return _state;
+    d.http.end();
+    _state = State::Done;
+    log("[http] GET %s -> %d, %u bytes%s, heap %u\n", d.url.c_str(), _result.status,
+        static_cast<unsigned>(body.size()), _result.truncated ? " (truncated)" : "",
+        static_cast<unsigned>(ESP.getFreeHeap()));
+    return _state;
+}
+
+void Fetch::cancel() {
+    if (_state != State::Running) return;
+    _impl->http.end();                          // closes the socket
+    _result.status = -1;
+    _result.error = "cancelled";
+    _state = State::Done;
 }
 
 // ---- secrets in NVS ----------------------------------------------------------
@@ -228,14 +289,13 @@ bool secretWrite(const std::string& name, const std::string& value) {
 // ============================================================================
 //  Download – HTTPClient's raw stream, a few KB per poll()
 // ============================================================================
-//  httpGet() above lets HTTPClient::writeToStream() pull the whole body in one
-//  blocking call. For a 10 MB file that would freeze the UI for 20+ seconds,
-//  so here we take the socket ("stream") and read only what has already
-//  arrived, every frame, straight into a file on the SD card.
+//  The same idea as Fetch above, but straight into a file on the SD card: a
+//  10 MB file does not fit in RAM. We take the socket ("stream") and read only
+//  what has already arrived, every frame.
 //
-//  Limitation, on purpose: the server must send Content-Length. With
-//  "Transfer-Encoding: chunked" the raw stream contains chunk headers between
-//  the data, and we would have to decode them ourselves. Static files (EDRDG,
+//  Limitation, on purpose: the server must send Content-Length, and we ask with
+//  HTTP/1.1 (unlike Fetch). Without a length we could not show a real progress
+//  bar or tell a finished file from a broken connection. Static files (EDRDG,
 //  `python3 -m http.server`) always send Content-Length.
 // ============================================================================
 namespace hal {
@@ -263,39 +323,12 @@ bool Download::start(const std::string& startUrl, const std::string& path) {
     d.path = path;
 
     // Connect and send the request. This part BLOCKS (DNS + TCP + maybe TLS:
-    // 0.2–2 s); only the body is read without blocking. Redirects are followed
-    // by hand, as in httpGet().
+    // 0.2–2 s); only the body is read without blocking.
     std::string current = startUrl;
-    if (!url::isWebUrl(current)) { _error = "refused: not an http(s) address"; return false; }
-    for (int hop = 0; hop < 5; ++hop) {
-        const bool https = current.rfind("https://", 0) == 0;
-        if (https) {
-            if (kCaBundleCerts == 0) { _error = "no CA certificates in this build (see README)"; return false; }
-            d.secure.setCACertBundle(kCaBundle);
-        }
-        WiFiClient& client = https ? static_cast<WiFiClient&>(d.secure) : d.plain;
-        d.http.setTimeout(15000);
-        d.http.setUserAgent("TDeckJisho/" JISHO_VERSION " (ESP32; dictionary download)");
-        d.http.setFollowRedirects(HTTPC_DISABLE_FOLLOW_REDIRECTS);
-        const char* keep[] = {"Location"};
-        d.http.collectHeaders(keep, 1);
-        if (!d.http.begin(client, current.c_str())) { _error = "bad URL"; return false; }
-        const int code = d.http.GET();
-        if (code == 301 || code == 302 || code == 303 || code == 307 || code == 308) {
-            const std::string next = url::resolve(current, d.http.header("Location").c_str());
-            d.http.end();
-            _error = url::redirectProblem(current, next);
-            if (!_error.empty()) return false;
-            current = next;
-            continue;
-        }
-        if (code != 200) {
-            _error = code < 0 ? std::string(d.http.errorToString(code).c_str()) : "HTTP " + std::to_string(code);
-            d.http.end();
-            return false;
-        }
-        break;
-    }
+    const int code = beginGet(d.http, d.plain, d.secure, current,
+                              "TDeckJisho/" JISHO_VERSION " (ESP32; dictionary download)", /*http10=*/false, _error);
+    if (code <= 0) return false;
+    if (code != 200) { _error = "HTTP " + std::to_string(code); d.http.end(); return false; }
     const int size = d.http.getSize();
     if (size <= 0) { _error = "server sent no Content-Length"; d.http.end(); return false; }
     if (static_cast<uint32_t>(size) > kMaxBytes) { _error = "file too large"; d.http.end(); return false; }

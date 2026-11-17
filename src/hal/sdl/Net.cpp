@@ -6,9 +6,8 @@
 //  succeeds after a short delay. The scan returns two fake networks so the
 //  Wi-Fi screen can be tried out.
 //
-//  HTTP uses libcurl, the C library behind the `curl` command. Its "easy"
-//  API: create a handle, set options, perform, read results, clean up.
-//  Python equivalent: requests.get(url, timeout=15, allow_redirects=True)
+//  HTTP uses libcurl, the C library behind the `curl` command, through its
+//  "multi" interface: curl that never blocks (see Download at the bottom).
 // ============================================================================
 
 #include <fcntl.h>      // open(): create the secrets file with permissions 0600
@@ -35,14 +34,6 @@ uint32_t g_connectAt = 0;
 uint32_t g_scanDoneAt = 0;
 bool g_scanning = false;
 
-struct Sink {
-    std::string* body;
-    size_t max;
-    bool truncated = false;
-};
-
-// libcurl calls this for every chunk of the body. It is a plain C callback,
-// so our state comes in through the `void* userdata` pointer.
 // SECURITY: libcurl speaks some 25 protocols, including file:// (read any file on
 // this PC) and ftp://. We want exactly two, for the first request AND redirects.
 // `httpsOnly`: for transfers that let libcurl follow redirects itself (the
@@ -60,17 +51,6 @@ void webOnly(CURL* c, bool httpsOnly = false) {
     // build trust anyone, while the device still refuses.
     curl_easy_setopt(c, CURLOPT_SSL_VERIFYPEER, 1L);
     curl_easy_setopt(c, CURLOPT_SSL_VERIFYHOST, 2L);
-}
-
-size_t onData(char* data, size_t size, size_t n, void* userdata) {
-    Sink* s = static_cast<Sink*>(userdata);
-    const size_t len = size * n;
-    if (s->body->size() + len > s->max) {
-        s->truncated = true;
-        return 0;   // returning less than len tells curl to abort the transfer
-    }
-    s->body->append(data, len);
-    return len;
 }
 
 }  // namespace
@@ -94,6 +74,7 @@ std::string wifiSsid() { return g_ssid; }
 std::string wifiIp() { return "127.0.0.1"; }
 
 bool wifiScanStart() {
+    if (g_state != WifiState::Connected) g_state = WifiState::Off;   // as on the device
     g_scanning = true;
     g_scanDoneAt = millis() + 1000;
     return true;
@@ -106,56 +87,133 @@ int wifiScanPoll(std::vector<WifiNetwork>& out) {
     return static_cast<int>(out.size());
 }
 
-HttpResult httpGet(const std::string& startUrl, size_t maxBytes) {
-    HttpResult r;
-    if (!url::isWebUrl(startUrl)) { r.error = "refused: not an http(s) address"; return r; }
-    std::string current = startUrl;
+// ---- Fetch: libcurl's multi interface (see Download below), into memory -------
+// Redirects by hand, exactly like the device: every hop passes the same policy
+// (url::redirectProblem), so the simulator is never more trusting than the T-Deck.
+// No CURLOPT_ACCEPT_ENCODING: the device gets no gzip either, and the byte counter
+// should show the same numbers on both.
+struct Fetch::Impl {
+    CURL* easy = nullptr;
+    CURLM* multi = nullptr;
+    std::string current;     // the URL of this hop
+    int hops = 0;
 
-    // Redirects by hand, exactly like the device: every hop passes the same policy
-    // (url::redirectProblem), so the simulator is never more trusting than the T-Deck.
-    for (int hop = 0; hop < 5; ++hop) {
-        CURL* c = curl_easy_init();
-        if (!c) { r.error = "curl init failed"; return r; }
-        r.body.clear();
-        Sink sink{&r.body, maxBytes};
-        curl_easy_setopt(c, CURLOPT_URL, current.c_str());
-        webOnly(c);
-        curl_easy_setopt(c, CURLOPT_FOLLOWLOCATION, 0L);       // we follow them ourselves
-        curl_easy_setopt(c, CURLOPT_TIMEOUT, 15L);
-        curl_easy_setopt(c, CURLOPT_USERAGENT, "TDeckJisho/" JISHO_VERSION " (text reader)");
-        curl_easy_setopt(c, CURLOPT_ACCEPT_ENCODING, "");      // allow gzip, auto-decoded
-        curl_easy_setopt(c, CURLOPT_WRITEFUNCTION, onData);
-        curl_easy_setopt(c, CURLOPT_WRITEDATA, &sink);
-
-        const CURLcode res = curl_easy_perform(c);
-        long code = 0;
-        curl_easy_getinfo(c, CURLINFO_RESPONSE_CODE, &code);
-        char* ct = nullptr;
-        curl_easy_getinfo(c, CURLINFO_CONTENT_TYPE, &ct);
-        char* loc = nullptr;                                   // absolute Location, if any
-        curl_easy_getinfo(c, CURLINFO_REDIRECT_URL, &loc);
-
-        r.status = static_cast<int>(code);
-        r.contentType = ct ? ct : "";
-        r.finalUrl = current;
-        r.truncated = sink.truncated;
-        const std::string next = loc ? loc : "";
-        curl_easy_cleanup(c);                                  // ct and loc die here
-        if (res != CURLE_OK && !sink.truncated) {
-            r.error = curl_easy_strerror(res);
-            if (r.status == 200) r.status = -1;
-            break;
+    // libcurl calls this for every chunk of the body. It is a plain C callback, so
+    // our state comes in through the `void* user` pointer: here, the Fetch itself.
+    // Impl is nested in Fetch, so it may touch Fetch's private members.
+    static size_t onBody(char* data, size_t size, size_t n, void* user) {
+        Fetch* f = static_cast<Fetch*>(user);
+        std::string& body = f->_result.body;
+        const size_t len = size * n;
+        if (body.size() + len >= f->_limit) {          // enough: keep what fits
+            body.append(data, f->_limit - body.size());
+            f->_result.truncated = true;
+            return 0;                                // less than len = "abort" for curl
         }
-        if ((code == 301 || code == 302 || code == 303 || code == 307 || code == 308) && !next.empty()) {
-            r.error = url::redirectProblem(current, next);
-            if (!r.error.empty()) { r.status = -1; break; }
-            current = next;
-            continue;
-        }
-        break;
+        body.append(data, len);
+        return len;
     }
-    log("[http] GET %s -> %d, %u bytes\n", startUrl.c_str(), r.status, static_cast<unsigned>(r.body.size()));
-    return r;
+
+    void open(Fetch* f) {
+        f->_result.body.clear();                     // a redirect's own body is not the page
+        f->_total = 0;
+        easy = curl_easy_init();
+        multi = curl_multi_init();
+        curl_easy_setopt(easy, CURLOPT_URL, current.c_str());
+        webOnly(easy);
+        curl_easy_setopt(easy, CURLOPT_FOLLOWLOCATION, 0L);   // we follow them ourselves
+        curl_easy_setopt(easy, CURLOPT_CONNECTTIMEOUT, 10L);
+        curl_easy_setopt(easy, CURLOPT_LOW_SPEED_LIMIT, 1L);  // abort if < 1 byte/s...
+        curl_easy_setopt(easy, CURLOPT_LOW_SPEED_TIME, 15L);  // ...for 15 s
+        curl_easy_setopt(easy, CURLOPT_USERAGENT, "TDeckJisho/" JISHO_VERSION " (text reader)");
+        curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION, onBody);
+        curl_easy_setopt(easy, CURLOPT_WRITEDATA, f);
+        if (const char* kbps = std::getenv("JISHO_NET_KBPS"))   // pretend to be Wi-Fi
+            curl_easy_setopt(easy, CURLOPT_MAX_RECV_SPEED_LARGE,
+                             static_cast<curl_off_t>(std::atol(kbps)) * 1024);
+        curl_multi_add_handle(multi, easy);
+    }
+
+    void cleanup() {
+        if (multi && easy) curl_multi_remove_handle(multi, easy);
+        if (easy) curl_easy_cleanup(easy);
+        if (multi) curl_multi_cleanup(multi);
+        easy = nullptr; multi = nullptr;
+    }
+    ~Impl() { cleanup(); }
+};
+
+Fetch::Fetch() = default;
+Fetch::~Fetch() = default;
+
+void Fetch::start(const std::string& url, size_t maxBytes) {
+    _impl = std::make_unique<Impl>();
+    _result = HttpResult{};
+    _total = 0;
+    _limit = maxBytes;
+    _result.finalUrl = url;
+    if (!url::isWebUrl(url)) {
+        _result.status = -1;
+        _result.error = "refused: not an http(s) address";
+        _state = State::Done;
+        return;
+    }
+    _impl->current = url;
+    _impl->open(this);
+    _state = State::Running;
+}
+
+Fetch::State Fetch::poll() {
+    if (_state != State::Running) return _state;
+    Impl& d = *_impl;
+    int running = 0;
+    curl_multi_perform(d.multi, &running);   // returns immediately
+    curl_off_t len = -1;
+    curl_easy_getinfo(d.easy, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &len);
+    if (len > 0) _total = static_cast<size_t>(len);
+    if (running) return _state;
+
+    // This hop is over. How did it go?
+    CURLcode res = CURLE_OK;
+    int left = 0;
+    while (CURLMsg* m = curl_multi_info_read(d.multi, &left))
+        if (m->msg == CURLMSG_DONE) res = m->data.result;
+    long code = 0;
+    curl_easy_getinfo(d.easy, CURLINFO_RESPONSE_CODE, &code);
+    char* ct = nullptr;
+    curl_easy_getinfo(d.easy, CURLINFO_CONTENT_TYPE, &ct);
+    char* loc = nullptr;                                   // absolute Location, if any
+    curl_easy_getinfo(d.easy, CURLINFO_REDIRECT_URL, &loc);
+    _result.contentType = ct ? ct : "";
+    const std::string next = loc ? loc : "";
+    d.cleanup();                                           // ct and loc die here
+
+    _result.finalUrl = d.current;
+    _result.status = static_cast<int>(code);
+    if (res != CURLE_OK && !_result.truncated) {
+        _result.error = curl_easy_strerror(res);
+        _result.status = -1;
+    } else if ((code == 301 || code == 302 || code == 303 || code == 307 || code == 308) && !next.empty()) {
+        _result.error = ++d.hops >= 5 ? "too many redirects" : url::redirectProblem(d.current, next);
+        if (_result.error.empty()) {
+            d.current = next;
+            d.open(this);
+            return _state;                                 // still Running: the next hop
+        }
+        _result.status = -1;
+    }
+    _state = State::Done;
+    log("[http] GET %s -> %d, %u bytes%s\n", _result.finalUrl.c_str(), _result.status,
+        static_cast<unsigned>(_result.body.size()), _result.truncated ? " (truncated)" : "");
+    return _state;
+}
+
+void Fetch::cancel() {
+    if (_state != State::Running) return;
+    _impl->cleanup();
+    _result.status = -1;
+    _result.error = "cancelled";
+    _state = State::Done;
 }
 
 // ---- secrets: a private file, NOT inside the simulated SD card -----------------
@@ -203,11 +261,11 @@ bool secretWrite(const std::string& name, const std::string& value) {
 // ============================================================================
 //  Download – libcurl's "multi" interface = curl without blocking
 // ============================================================================
-//  curl_easy_perform() (above) blocks until the transfer is over. The multi
-//  interface instead lets US call curl_multi_perform() whenever we like; each
+//  curl_easy_perform(), the "easy" API, blocks until the transfer is over. The multi
+//  interface (also used by Fetch above) instead lets US call curl_multi_perform() whenever we like; each
 //  call moves the transfer forward by whatever the socket has ready and returns
 //  at once. That is exactly the shape of the device version (read what is
-//  available, return), so the BuildScreen cannot tell the two apart.
+//  available, return), so the screens cannot tell the two apart.
 // ============================================================================
 struct Download::Impl {
     CURL* easy = nullptr;
@@ -263,7 +321,7 @@ bool Download::start(const std::string& url, const std::string& path) {
     curl_easy_setopt(d.easy, CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(d.easy, CURLOPT_MAXREDIRS, 5L);
     curl_easy_setopt(d.easy, CURLOPT_USERAGENT, "TDeckJisho/" JISHO_VERSION " (dictionary download)");
-    // NOT CURLOPT_ACCEPT_ENCODING here (httpGet uses it). Some servers label a
+    // NOT CURLOPT_ACCEPT_ENCODING here (as in Fetch). Some servers label a
     // .gz file "Content-Encoding: gzip", and curl would then quietly unpack it:
     // the PC would get XML while the device gets gzip. The builder checks the
     // magic bytes anyway, but the two targets should not differ for no reason.

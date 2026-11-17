@@ -86,6 +86,17 @@ bool findWifi(const std::string& ssid, std::string& passwordOut) {
     return false;
 }
 
+bool pickSavedWifi(const std::vector<WifiCred>& creds, const std::vector<hal::WifiNetwork>& inRange,
+                   WifiCred& out) {
+    const hal::WifiNetwork* best = nullptr;
+    for (const auto& n : inRange) {
+        if (best && n.rssi <= best->rssi) continue;   // dBm: higher (closer to 0) is stronger
+        for (const auto& c : creds)
+            if (c.ssid == n.ssid) { best = &n; out = c; break; }
+    }
+    return best != nullptr;
+}
+
 void importWifiFromSd() {
     std::string text;
     if (!hal::readFile(paths::kWifi, text, 16 * 1024)) return;     // no file: nothing to do

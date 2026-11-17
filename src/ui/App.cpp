@@ -36,10 +36,9 @@ void App::begin() {
     build::DictBuilder::recoverSwap();
     if (!_dict.open(paths::kDict)) hal::log("[app] dictionary: %s\n", _dict.error().c_str());
 
-    // ---- Wi-Fi: connect to the most recently used network, if any ----------
+    // ---- Wi-Fi: join whichever saved network is in range, if any -----------
     importWifiFromSd();                 // a wifi.txt on the card moves into NVS, once
-    const auto creds = loadWifiCreds();
-    if (!creds.empty()) hal::wifiConnect(creds[0].ssid, creds[0].password);
+    startAutoConnect();
 
     _now = _lastInput = hal::millis();
     _stack.push_back(actions::home(*this));
@@ -107,6 +106,10 @@ void App::checkWifiGiveUp() {
     const hal::WifiState ws = hal::wifiState();
     if (ws != _wifiState) {
         if (ws == hal::WifiState::Connecting) _wifiTryingSince = _now;   // the clock starts
+        if (ws == hal::WifiState::Connected) _autoUsed = false;           // a new auto try is allowed
+        // Lost the network and it did not come back (you walked away from home):
+        // maybe another saved one is here. Not on the Wi-Fi screen – the user is choosing.
+        if (ws == hal::WifiState::Failed && !_autoUsed && !_stack.back()->holdsWifi()) startAutoConnect();
         _wifiState = ws;
     }
     if (ws != hal::WifiState::Connecting && ws != hal::WifiState::Failed) return;
@@ -120,6 +123,33 @@ void App::checkWifiGiveUp() {
     hal::wifiDisconnect();
     _wifiState = hal::WifiState::Off;
     toast(i18n::tr(i18n::Str::WifiGaveUp), 5000);
+}
+
+// Auto-connect: scan first, then join the strongest SAVED network that answered.
+// Simply trying the most recent one would fail whenever you are somewhere else.
+// At most once per lost connection (`_autoUsed`): a saved network that is in range
+// but refuses us (changed password) must not cause an endless scan/connect loop.
+void App::startAutoConnect() {
+    if (loadWifiCreds().empty()) return;      // nothing saved: leave the radio off
+    _autoUsed = true;
+    _autoScanning = hal::wifiScanStart();     // also drops a stuck attempt (see Hal.hpp)
+    if (!_autoScanning) hal::log("[wifi] auto-connect: scan did not start\n");
+}
+
+void App::pollAutoConnect() {
+    if (!_autoScanning) return;
+    // The Wi-Fi screen polls the same (single) scan; let it have the result.
+    if (_stack.back()->holdsWifi()) { _autoScanning = false; return; }
+    std::vector<hal::WifiNetwork> nets;
+    if (hal::wifiScanPoll(nets) < 0) return;   // still scanning
+    _autoScanning = false;
+    WifiCred pick;
+    if (pickSavedWifi(loadWifiCreds(), nets, pick)) {
+        hal::wifiConnect(pick.ssid, pick.password);
+    } else {
+        hal::log("[wifi] auto-connect: no saved network in range, radio off\n");
+        hal::wifiDisconnect();                // nothing to join: don't drain the battery
+    }
 }
 
 void App::toast(const std::string& msg, uint32_t ms) {
@@ -175,6 +205,7 @@ void App::tick() {
 
     // Wi-Fi is checked even while the screen is off: a radio searching for a network that
     // isn't there drains the battery whether anyone looks or not.
+    pollAutoConnect();
     checkWifiGiveUp();
     if (_asleep) return;
 

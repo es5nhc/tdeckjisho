@@ -4,7 +4,7 @@
 |---|---|
 | Wi-Fi: scan, connect, the status bar | `hal/tdeck/Net.cpp`, `screens/WifiScreen.*` |
 | Saved networks and passwords | `core/WifiStore.*`, `hal::secretRead/Write` |
-| One page or feed (blocking) | `hal::httpGet()` |
+| One page or feed into memory (cancellable, with progress) | `hal::Fetch`, `screens/WebLoadScreen.hpp` |
 | A big file straight to the card (not blocking) | `hal::Download` |
 | What may be fetched at all | `core/Url.*`: `isWebUrl()`, `redirectProblem()` |
 | HTTPS certificates | `tools/make_ca_bundle.py`, `hal/tdeck/CaVerify.cpp` |
@@ -28,7 +28,23 @@ Scanning takes 2–4 seconds, so it uses the start-then-poll pattern from chapte
 `wifiScanStart()`, then `wifiScanPoll()` every frame until it returns something other
 than -1.
 
-At boot, `App::begin()` connects to the most recently used saved network.
+The ESP32 cannot scan while it is still trying to *join* a network: `scanNetworks()`
+fails at once. So `wifiScanStart()` first drops a connection attempt in progress
+(`Connecting` or `Failed` become `Off`); scanning while `Connected` works and is left alone.
+
+### Auto-connect: whichever saved network is here
+
+At boot, `App::begin()` calls `App::startAutoConnect()`. Instead of blindly trying the
+most recently used network (useless when you are at a café, not at home), it starts a
+scan; `App::pollAutoConnect()` waits for the result and joins the saved network with the
+strongest signal (`pickSavedWifi()` in `src/core/WifiStore.cpp`, unit-tested on the PC).
+If none of them is in range, the radio goes off straight away.
+
+The same happens once after a lost connection: when the driver's reconnect attempts end
+in `Failed` (you walked away from the router), the app scans for another saved network.
+Only once until the next successful connection (`_autoUsed`): a saved network that is in
+range but refuses us, say after a password change, must not cause an endless
+scan-connect loop. Neither runs while the Wi-Fi screen is open; there you are choosing.
 
 ### Switching the radio off when there is no network
 
@@ -86,18 +102,39 @@ only your user can open. It's outside the simulated SD card on purpose.
 that needs a different client object. Following them by hand also gives the final URL,
 which relative links in a page need.
 
-## `httpGet()` and `Download`
+## `Fetch` and `Download`
 
-`hal::httpGet(url, maxBytes)` blocks until the whole body has arrived, so callers run it
-inside a `LoadingScreen` (chapter 01). The body goes into a `std::string` through
-`StringSink`, a small adapter class that makes a string look like the `Stream` that
-`HTTPClient` wants to write into.
+Both use the start-then-poll pattern (chapter 01), and both follow redirects through the
+same function, `beginGet()` in `hal/tdeck/Net.cpp`.
+
+`hal::Fetch` loads a page or a feed into a `std::string`, at most `maxBytes`.
+`start()` connects. On the device that **blocks**: `HTTPClient::GET()` does the DNS
+lookup, TCP, the TLS handshake and waits for the response headers in one call, and none
+of that can be split up. It usually takes 0.5–3 s, at most the 10 s timeout. After that,
+each `poll()` reads only what has already arrived, for at most about 25 ms. On a slow
+link the body is the long part, and that part can be cancelled.
+
+There is one trick. `Fetch` asks for **HTTP/1.0**. An HTTP/1.1 server may send the body
+*chunked*: pieces with a size line before each one, so the server needn't know the
+total in advance. `HTTPClient`'s blocking `writeToStream()` decodes that, but a raw
+read of the socket would see the size lines mixed into the page. An HTTP/1.0 server
+never sends chunks: just the body, then it closes the connection. "Connection closed"
+therefore means "done", unless the server promised a `Content-Length` and sent less,
+which is an error.
+
+`screens/WebLoadScreen.hpp` drives it. It shows "Connecting to …" before the blocking
+`start()` (the same draw-first trick as `LoadingScreen`), then the byte count, with a
+bar when the server sent `Content-Length`. Backspace cancels. When the body is complete,
+a callback turns it into a screen (the web reader or a feed list), and `WebLoadScreen`
+replaces itself with that screen.
+
+In the simulator, `Fetch` uses libcurl's *multi* interface, so there even the connection
+doesn't block. To watch the counter on a fast PC connection, set `JISHO_NET_KBPS=50`.
 
 `hal::Download` is for files far bigger than RAM, such as JMdict (10 MB compressed). It
-connects (blocking for a second or two), then reads only what has already arrived, a
-few KB per `poll()` and at most about 25 ms per frame, straight into
-`<path>.part`. The file is renamed to its real name only when every byte has arrived,
-so a broken download never looks finished. The server must send `Content-Length`.
+works the same way, but writes to `<path>.part` on the card instead of to memory. The
+file is renamed to its real name only when every byte has arrived, so a broken download
+never looks finished. It asks with HTTP/1.1, and the server must send `Content-Length`.
 
 ## HTTPS: how the device decides whom to trust
 
@@ -207,7 +244,7 @@ ERR News (English) | https://news.err.ee/rss
 https://example.org/feed.xml            (no name: the host name is shown)
 ```
 
-`a` in the feed list adds one. Opening a feed downloads it (`httpGet`), makes sure it's
+`a` in the feed list adds one. Opening a feed downloads it (`Fetch`), makes sure it's
 UTF-8, and `rt::parseFeed()` (`src/text/Feed.cpp`) finds the `<item>` (RSS) or
 `<entry>` (Atom) blocks without a full XML parser. An article shows its summary, which
 is HTML and goes through `parseHtml()` (chapter 03), plus a link to the full page.

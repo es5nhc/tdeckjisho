@@ -18,6 +18,7 @@
 #include "screens/SearchScreen.hpp"
 #include "screens/TouchTestScreen.hpp"
 #include "screens/UpdateDictScreen.hpp"
+#include "screens/WebLoadScreen.hpp"
 #include "screens/WifiScreen.hpp"
 #include "text/Feed.hpp"
 #include "text/Images.hpp"
@@ -345,14 +346,9 @@ void openFeeds(App& app) {
 
 void openFeed(App& app, const std::string& name, const std::string& feedUrl) {
     if (!requireNetwork(app)) return;
-    app.push(std::make_unique<LoadingScreen>(
-        name, fmt(Str::DownloadingHost, {{"host", url::host(feedUrl)}}),
-        [name, feedUrl](App&, std::string& err) -> std::unique_ptr<Screen> {
-            hal::HttpResult r = hal::httpGet(feedUrl, kMaxWebBytes);
-            if (r.status != 200) {
-                err = r.error.empty() ? "HTTP " + std::to_string(r.status) : r.error;
-                return nullptr;
-            }
+    app.push(std::make_unique<WebLoadScreen>(
+        name, feedUrl, kMaxWebBytes,
+        [name](App&, hal::HttpResult& r, std::string& err) -> std::unique_ptr<Screen> {
             ensureUtf8(r);                // feeds are input from outside, too
             return feedScreen(name, r.body, err);
         }));
@@ -379,14 +375,9 @@ void openUrl(App& app, const std::string& target) {
         return;
     }
     if (!requireNetwork(app)) return;
-    app.push(std::make_unique<LoadingScreen>(
-        url::host(target), fmt(Str::LoadingUrl, {{"url", target}}),
-        [target](App&, std::string& err) -> std::unique_ptr<Screen> {
-            hal::HttpResult r = hal::httpGet(target, kMaxWebBytes);
-            if (r.status != 200) {
-                err = r.error.empty() ? "HTTP " + std::to_string(r.status) : r.error;
-                return nullptr;
-            }
+    app.push(std::make_unique<WebLoadScreen>(
+        url::host(target), target, kMaxWebBytes,
+        [](App&, hal::HttpResult& r, std::string& err) -> std::unique_ptr<Screen> {
             ensureUtf8(r);
             if (looksLikeFeed(r.body)) return feedScreen(url::host(r.finalUrl), r.body, err);
 

@@ -37,9 +37,10 @@ X(HintListDefault,  "↑↓ vali   Enter ava   BS tagasi",
 X(HintBackOnly,     "BS tagasi", "BS back", "BS 戻る")
 X(ListEmpty,        "(tühi)", "(empty)", "(空)")
 X(PleaseWait,       "palun oota…", "please wait…", "お待ちください…")
+X(HintCancel,       "BS katkesta", "BS cancel", "BS 中止")
 X(ErrorLabel,       "Viga:", "Error:", "エラー:")
 X(NoSdCard,         "SD-kaarti pole", "No SD card", "SDカードがありません")
-X(NotConnectedOpenWifi, "Pole ühendatud – ühendu kõigepelt Wi-Fi võrku",
+X(NotConnectedOpenWifi, "Pole ühendatud – ühendu kõigepealt Wi-Fi võrku",
                         "Not connected – please connect to Wi-Fi first",
                         "未接続 – Wi-Fiに接続してくださし")
 
@@ -137,12 +138,12 @@ X(AddFeedTitle,     "Lisa voog", "Add feed", "フィード追加")
 X(AddFeedPrompt,    "Voo URL (RSS või Atom):", "Feed URL (RSS or Atom):", "フィードURL (RSSまたはAtom):")
 X(ArticleDefault,   "Artikkel", "Article", "記事")
 X(FeedNoArticles,   "Voos ei leitud artikleid", "No articles found in feed", "記事が見つかりません")
-X(DownloadingHost,  "Laadin alla\n{host}…", "Downloading\n{host}…", "ダウンロード中\n{host}…")
+X(WebConnecting,    "Ühendun:\n{host}…", "Connecting to\n{host}…", "{host}\nに接続中…")
 X(WebPrompt,        "Aadress (https:// lisatakse, kui puudub):",
                     "Address (https:// is added if missing):",
                     "アドレス (https:// は省略可):")
 X(CantOpen,         "Ei saa avada: {url}", "Can't open: {url}", "開けません: {url}")
-X(LoadingUrl,       "Laen\n{url}", "Loading\n{url}", "読み込み中\n{url}")
+X(WebReceiving,     "Laen: {host}", "Loading {host}", "{host} を読み込み中")
 X(PageTruncated,    "[leht lõigati 1,5 MB juures]", "[page truncated at 1.5 MB]",
                     "[ページは1.5MBで切り捨てました]")
 

@@ -78,6 +78,8 @@ private:
     void applyPending();
     bool wakeUp();          // a key or tap arrived; true = it only woke the screen (swallow it)
     void checkWifiGiveUp(); // radio off after `wifi_off_s` seconds without a network
+    void startAutoConnect(); // scan for saved networks (at boot, after a lost connection)
+    void pollAutoConnect();  // ...and join the strongest one when the scan is done
     void render();
     void drawTopBar(lgfx::LovyanGFX& g);
     void drawBottomBar(lgfx::LovyanGFX& g);
@@ -103,4 +105,6 @@ private:
     std::string _lastStatus;
     hal::WifiState _wifiState = hal::WifiState::Off;   // as seen at the last tick
     uint32_t _wifiTryingSince = 0;                     // when it last started Connecting
+    bool _autoScanning = false;   // an auto-connect scan is running
+    bool _autoUsed = false;       // auto-connect already tried since the last Connected
 };

@@ -239,6 +239,8 @@ std::string wifiIp();
 // Scanning takes 2–4 seconds. Instead of blocking the UI we START a scan and
 // then POLL it from the main loop. Returns -1 while still running, otherwise
 // the number of networks written into `out`.
+// Starting a scan abandons a connection attempt still in progress (Connecting
+// or Failed → Off): the ESP32 cannot scan while it is trying to join.
 bool wifiScanStart();
 int wifiScanPoll(std::vector<WifiNetwork>& out);
 
@@ -251,11 +253,48 @@ struct HttpResult {
     bool truncated = false;    // body was cut at maxBytes
 };
 
-// BLOCKING HTTP(S) GET with redirects. The UI shows a "Loading…" screen
-// before calling it (see screens/LoadingScreen.hpp).
+// A web page (or feed) into MEMORY, start-then-poll, so the user can cancel and
+// watch the bytes arrive (see screens/WebLoadScreen.hpp):
+//
+//     hal::Fetch f;
+//     f.start(url, maxBytes);           // device: BLOCKS for connect + headers
+//     ...every frame:  if (f.poll() == hal::Fetch::State::Done) use f.result()
+//
 // Only http/https (url::isWebUrl), checked again on every redirect; https
-// certificates are always verified. Anything else fails with r.error set.
-HttpResult httpGet(const std::string& url, size_t maxBytes);
+// certificates are always verified.
+//
+// Why start() still blocks on the device: HTTPClient's GET() does DNS, TCP, the
+// TLS handshake and waits for the response headers in one call, and none of that
+// can be cut into pieces. Usually 0.5–3 s; at most the 10 s timeout. Only the
+// BODY is read without blocking, a few KB per poll(). On a slow link that is the
+// long part. (The PC version uses libcurl's multi interface: nothing blocks.)
+//
+// Done means "finished": check result().status (200 = OK, <= 0 = transport error
+// with result().error set), as a body may be cut at maxBytes (result().truncated).
+class Fetch {
+public:
+    enum class State { Idle, Running, Done };
+
+    Fetch();
+    ~Fetch();                        // defined in Net.cpp, where Impl is complete
+    Fetch(const Fetch&) = delete;
+    Fetch& operator=(const Fetch&) = delete;
+
+    void start(const std::string& url, size_t maxBytes);
+    State poll();                    // does a little work; call every frame
+    void cancel();                   // closes the connection; state becomes Done
+    State state() const { return _state; }
+    size_t done() const { return _result.body.size(); }
+    size_t total() const { return _total; }      // 0 = server did not say
+    HttpResult& result() { return _result; }
+
+private:
+    struct Impl;
+    std::unique_ptr<Impl> _impl;
+    State _state = State::Idle;
+    size_t _total = 0, _limit = 0;   // not `_max`: Arduino.h has a _max(a, b) MACRO
+    HttpResult _result;
+};
 
 // Secrets (Wi-Fi passwords) never go on the SD card: anyone who borrows the card
 // reads it on a PC in ten seconds. Device: the ESP32's NVS ("non-volatile storage",
@@ -291,7 +330,7 @@ public:
     Download(const Download&) = delete;
     Download& operator=(const Download&) = delete;
 
-    // Same policy as httpGet: http/https only, every redirect checked, certificates
+    // Same policy as Fetch: http/https only, every redirect checked, certificates
     // verified. A server may claim any size: anything above kMaxBytes is refused
     // (JMdict_e.gz is ~10 MB, the unpacked XML ~60 MB), so it can't fill the card.
     static constexpr uint32_t kMaxBytes = 128u * 1024 * 1024;

@@ -167,15 +167,16 @@ The loop must keep turning, or keys pile up and the screen freezes. The code has
 ways of doing work that takes longer than one frame.
 
 **1. Show "Loading…", then block** (`src/screens/LoadingScreen.hpp`). For jobs of a
-second or two: opening a book, fetching a web page. The screen draws "Loading…" first,
-and on the *next* `update()` runs the job and replaces itself with the result. The UI
-is frozen while the job runs, but the user sees why. It's the simplest pattern, and the
-right one when the job can't be cut into pieces (a blocking `HTTPClient::GET()`).
+second or two, such as opening a book. The screen draws "Loading…" first, and on the
+*next* `update()` runs the job and replaces itself with the result. The UI is frozen
+while the job runs, but the user sees why. It's the simplest pattern, and the right one
+when the job can't be cut into pieces. `WebLoadScreen` uses the same trick for the one
+part of loading a web page that can't be split: the connection (chapter 05).
 
 **2. Start, then poll.** The job runs somewhere else (a Wi-Fi driver task, a network
 stack), and the screen asks every frame "done yet?". Wi-Fi scanning
-(`hal::wifiScanStart()` / `wifiScanPoll()`) and big downloads (`hal::Download`) work
-like this.
+(`hal::wifiScanStart()` / `wifiScanPoll()`), web pages (`hal::Fetch`) and big downloads
+(`hal::Download`) work like this.
 
 **3. Steps with a time budget.** The job is cut into slices. The dictionary builder's
 `step(30)` works for about 30 ms and returns, and `UpdateDictScreen::update()` calls it

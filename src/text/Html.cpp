@@ -354,7 +354,7 @@ void parseHtml(std::string_view html, const std::string& baseUrl, Source source,
             } else if (!alt.empty()) {
                 // A web page: pictures would need extra downloads (and RAM),
                 // so only the alt text is shown. (Exercise: fetch small ones
-                // with hal::httpGet and decode them from memory.)
+                // with hal::Fetch and decode them from memory.)
                 bld.code(DIM); bld.text("[" + alt + "]"); bld.code(DIM);
             }
         }
