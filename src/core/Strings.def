@@ -273,7 +273,7 @@ X(QuizHintsAsk,     "a-d vali   ↑↓ Enter   BS välju", "a-d answer   ↑↓ 
                     "a-d 回答   ↑↓ Enter   BS 終了")
 X(QuizHintsNext,    "Enter edasi   i kogu kirje   BS välju", "Enter next   i full entry   BS quit",
                     "Enter 次へ   i 詳細   BS 終了")
-X(QuizHintsDone,    "Lõpetamiseks vajuta Enter", "Press Enter to return to home screen", "Enter - 終了")
+X(QuizHintsDone,    "Lõpetamiseks vajuta Enter", "Press Enter to return to the home screen", "Enter - 終了")
 X(QuizAskReading,   "Kuidas seda sõna loetakse?", "How is this word read?", "この言葉の読み方は？")
 X(QuizAskMeaning,   "Mida see sõna tähendab?", "What does this word mean?", "この言葉の意味は？")
 X(QuizAskJapanese,  "Milline jaapani sõna see on?", "Which Japanese word is this?", "これは日本語でどうですか？")

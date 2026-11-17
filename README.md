@@ -18,6 +18,8 @@ including the touchscreen. The UI is in Estonian, English and Japanese. Use at y
 | ![furigana](docs/img/aozora-furigana.png) | ![HTML ruby](docs/img/html-ruby.png) | ![look-up cursor](docs/img/lookup-cursor.png) |
 | ![markdown](docs/img/markdown.png) | ![library](docs/img/library.png) | ![pictures](docs/img/pictures-jpeg.png) |
 | ![picture in a sentence](docs/img/pictures-png.png) | ![unsupported picture](docs/img/pictures-fallback.png) | ![update dictionary](docs/img/update-progress.png) |
+| ![Quiz: selection](docs/img/quiz1.png) | ![Quiz: correct answer](docs/img/quiz2.png) | ![Quiz: incorrect answer](docs/img/quiz3.png) |
+| ![Quiz: results](docs/img/quiz4.png)
 
 ## Features
 
