@@ -9,7 +9,7 @@ A pocket **Japanese ⇄ English dictionary** with an **e-book reader**, an **RSS
 (ESP32-S3, 320×240 screen, keyboard, trackball). The same code runs in an **SDL window on
 a PC**, so most development needs no flashing.
 
-**Status: 0.1, a personal project.** It works in the simulator and on the device,
+**Status: 0.1.1, a personal project.** It works in the simulator and on the device,
 including the touchscreen. The UI is in Estonian, English and Japanese. Use at your own risk.
 
 | | | |
