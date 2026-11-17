@@ -90,7 +90,10 @@ steps:
    dictionary builder do their work here.
 4. **Power saving:** dim the backlight at ¾ of the idle timeout, and switch the display
    off at the timeout (settings key `sleep_s`, default 120 s). The key that wakes the
-   screen is swallowed, so it doesn't also trigger something.
+   screen is swallowed, so it doesn't also trigger something. "Full" brightness is the
+   `brightness` setting, not the maximum. The Wi-Fi radio is switched off after
+   `wifi_off_s` seconds without finding a network (chapter 05). That check runs even
+   while the screen is off.
 5. **Status bar:** once a second, check whether the clock minute, Wi-Fi state or
    battery changed.
 6. **Draw:** if anything is "dirty", redraw the whole screen.

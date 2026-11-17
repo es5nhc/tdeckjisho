@@ -52,4 +52,8 @@ public:
     virtual void update(App&) {}
     // Draw into the off-screen canvas `g`, inside `area`.
     virtual void draw(App& app, lgfx::LovyanGFX& g, const Rect& area) = 0;
+
+    // True while this screen needs the Wi-Fi radio left alone even without a connection
+    // (the Wi-Fi screen, while the user scans and picks a network). See App::checkWifiGiveUp.
+    virtual bool holdsWifi() const { return false; }
 };

@@ -79,7 +79,8 @@ pulses (see LilyGO's T-Deck `UnitTest` example):
 
 So `backlightSteps()` in `Board.cpp` remembers the chip's level and sends the number of
 pulses to the wanted one, and `hal::setBacklight()` maps 0–255 onto the 16 steps (the
-dim level 40 is step 3). At start-up the pin is held LOW first, so the chip is off and
+dim level 40 is step 3). The app never asks for more than the `brightness` setting
+(Home → Settings, 10–100 %), and dims to half of that, at most 40. At start-up the pin is held LOW first, so the chip is off and
 its level known, whatever Launcher left it at. LovyanGFX's `Light_PWM` must not drive
 this pin: 44,000 pulses a second make the level spin round, and the display came back
 from sleep at a random brightness, often about half.
@@ -158,7 +159,7 @@ driver.
 After reading, the code writes 0 to `0x814E`, or the chip never reports again. A finger
 held down counts as **one** tap. The panel's raw coordinates are turned into screen
 coordinates with LilyGO's own settings (x and y swapped, one axis mirrored).
-**Home → Touch test** (`p`) shows the raw and converted points, so you can check the
+**Settings → Touch test** (Home → `c`, then `p`) shows the raw and converted points, so you can check the
 mapping on your own device.
 
 ## Battery and clock

@@ -54,12 +54,24 @@ X(HomeNews,         "RSS lugeja", "RSS reader", "RSS")
 X(HomeWeb,          "Veeb", "Web", "ウェブ")
 X(HomeUpdate,       "Uuenda sõnaraamatut", "Update dictionary", "辞書をアップデート")
 X(HomeDownload,     "Lae sõnaraamat alla", "Download dictionary", "辞書をダウンロード")   // no dictionary yet
-X(HomeWifi,         "Wi-Fi", "Wi-Fi", "Wi-Fi")
-X(HomeLanguage,     "Keel", "Language", "言語")
-X(HomeTouch,       "Puutetest", "Touch test", "タッチテスト")
+X(HomeSettings,     "Seaded", "Settings", "設定")
 X(HomeAbout,        "Teave", "About", "このアプリについて")
 
 // ---- language screen -----------------------------------------------------------
+// ---- settings (Home → c) ---------------------------------------------------------
+X(SetHints,         "↑↓ vali   ← → muuda   Enter ava   BS",
+                    "↑↓ select   ← → change   Enter open   BS",
+                    "↑↓ 選択   ← → 変更   Enter 開く   BS")
+X(SetBrightness,    "Ekraani heledus", "Screen brightness", "画面の明るさ")
+X(SetSleep,         "Ekraan kustub", "Screen off after", "画面オフまで")
+X(SetWifiOff,       "Wi-Fi välja, kui võrku pole", "Disable Wi-Fi if no network", "圏外でWi-Fiオフにする")
+X(SetLanguage,      "Keel", "Language", "言語")
+X(SetWifi,          "Wi-Fi seaded", "Wi-Fi settings", "Wi-Fi設定")
+X(SetTouch,         "Puutetest", "Touch test", "タッチテスト")
+X(SetNever,         "ei", "never", "しない")
+X(UnitSeconds,      "{n} s", "{n} s", "{n} 秒")
+X(UnitMinutes,      "{n} min", "{n} min", "{n} 分")
+
 X(LangTitle,        "Keel", "Language", "言語")
 
 // ---- dictionary entry ------------------------------------------------------------
@@ -160,6 +172,8 @@ X(WifiConnectingTo, "Ühendan: {ssid}…", "Connecting to {ssid}…", "{ssid} �
 X(WifiDisconnected, "Ühendus katkestatud", "Disconnected", "切断しました")
 X(WifiForgot,       "Unustatud: {ssid}", "Forgot {ssid}", "{ssid} を削除しました")
 X(WifiConnectedSaved, "Ühendatud · salvestatud", "Connected · saved", "接続済み · 保存しました")
+X(WifiGaveUp,       "Võrku ei leitud – Wi-Fi lülitati välja", "No network found – Wi-Fi switched off",
+                    "ネットワークなし – Wi-Fiをオフにしました")
 X(WifiPasswordTitle,  "Wi-Fi parool", "Wi-Fi password", "Wi-Fi パスワード")
 X(WifiPasswordPrompt, "Võrgu {ssid} parool", "Password for {ssid}", "{ssid} のパスワード")
 X(WifiScanning,     "Skaneerin…", "Scanning…", "スキャン中…")

@@ -30,6 +30,20 @@ than -1.
 
 At boot, `App::begin()` connects to the most recently used saved network.
 
+### Switching the radio off when there is no network
+
+`Failed` is only what the status bar shows. With auto-reconnect on, the driver keeps
+looking for the network forever (you left home, the router is off), and the radio is one
+of the biggest power users on the board. So `App::checkWifiGiveUp()` (`src/ui/App.cpp`)
+starts a clock each time the state turns to `Connecting`: at boot, after a lost
+connection, or after you pick a network. If the state hasn't reached `Connected` within
+`wifi_off_s` seconds (default 60, Home → Settings), the app calls `hal::wifiDisconnect()`,
+which turns the radio off, and shows a toast. Settings → Wi-Fi turns it on again. The check
+also runs while the screen is off.
+
+While the Wi-Fi screen is open the clock is held (the screen's `holdsWifi()` returns
+true), so the radio is never pulled out from under a scan you are watching.
+
 ### Passwords never go on the SD card
 
 Anyone who borrows the card can read a text file on it in ten seconds. Saved networks

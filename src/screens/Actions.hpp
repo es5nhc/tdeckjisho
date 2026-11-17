@@ -34,8 +34,9 @@ void openUrl(App& app, const std::string& url);
 void openWifi(App& app);
 void openUpdateDict(App& app);   // download JMdict / build on the device
 void openLanguage(App& app);     // choose the user-interface language
+void openSettings(App& app);     // brightness, timeouts; links to language, Wi-Fi, touch test
 void openAbout(App& app);
-void openTouchTest(App& app);   // Home → p: check the touchscreen mapping
+void openTouchTest(App& app);   // Settings → p: check the touchscreen mapping
 
 // Exposed for testing / reuse: dictionary entry -> readable document.
 rt::Doc entryToDoc(const DictEntry& e);

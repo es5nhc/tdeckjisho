@@ -14,12 +14,12 @@ including the touchscreen. The UI is in Estonian, English and Japanese. Use at y
 
 | | | |
 |---|---|---|
-| ![home](docs/img/home.png) | ![search](docs/img/search.png) | ![entry](docs/img/entry.png) |
-| ![furigana](docs/img/aozora-furigana.png) | ![HTML ruby](docs/img/html-ruby.png) | ![look-up cursor](docs/img/lookup-cursor.png) |
-| ![markdown](docs/img/markdown.png) | ![library](docs/img/library.png) | ![pictures](docs/img/pictures-jpeg.png) |
-| ![picture in a sentence](docs/img/pictures-png.png) | ![unsupported picture](docs/img/pictures-fallback.png) | ![update dictionary](docs/img/update-progress.png) |
+| ![Home](docs/img/home.png) | ![Search](docs/img/search.png) | ![Entry](docs/img/entry.png) |
+| ![Furigana](docs/img/aozora-furigana.png) | ![HTML furigana](docs/img/html-ruby.png) | ![Look-up cursor](docs/img/lookup-cursor.png) |
+| ![Markdown](docs/img/markdown.png) | ![Library](docs/img/library.png) | ![Pictures](docs/img/pictures-jpeg.png) |
+| ![Picture in a sentence](docs/img/pictures-png.png) | ![Unsupported picture](docs/img/pictures-fallback.png) | ![Update dictionary](docs/img/update-progress.png) |
 | ![Quiz: selection](docs/img/quiz1.png) | ![Quiz: correct answer](docs/img/quiz2.png) | ![Quiz: incorrect answer](docs/img/quiz3.png) |
-| ![Quiz: results](docs/img/quiz4.png)
+| ![Quiz: results](docs/img/quiz4.png) | ![Settings](docs/img/settings.png) | |
 
 ## Features
 
@@ -39,6 +39,9 @@ including the touchscreen. The UI is in Estonian, English and Japanese. Use at y
   子グマ → 子熊) and counters after a number (3人 → にん).
 - **News** (RSS 2.0 and Atom) and a **reader-mode web browser**.
 - **Wi-Fi:** scan, connect, remember networks, NTP clock.
+- **Settings** (Home → `c`): screen brightness, screen timeout, and switching Wi-Fi off
+  when no network is found, to save battery. The language, Wi-Fi setup and the touch test
+  are here too.
 
 ## Quick start: the PC simulator
 

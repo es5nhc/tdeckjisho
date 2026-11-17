@@ -167,9 +167,7 @@ std::unique_ptr<Screen> home(App& app) {
         {Str::HomeNews,       'n', openFeeds},
         {Str::HomeWeb,        'w', openWebPrompt},
         {Str::HomeUpdate,     'u', openUpdateDict},
-        {Str::HomeWifi,       's', openWifi},
-        {Str::HomeLanguage,   'g', openLanguage},
-        {Str::HomeTouch,      'p', openTouchTest},
+        {Str::HomeSettings,   'c', openSettings},
         {Str::HomeAbout,      'a', openAbout},
     };
 
@@ -429,8 +427,110 @@ void openLanguage(App& app) {
         i18n::setLanguage(l);
         a.settings().set("lang", i18n::code(l));      // remembered across reboots
         a.settings().save();
-        a.pop();   // back to Home, which refills its texts in onEnter()
+        a.pop();   // back to Settings, which refills its texts in onEnter() (Home too, later)
     }));
+}
+
+// ============================================================================
+//  Settings
+// ============================================================================
+namespace {
+
+std::string showDuration(int s) {
+    if (s <= 0) return tr(Str::SetNever);
+    if (s < 60 || s % 60) return fmt(Str::UnitSeconds, {{"n", std::to_string(s)}});
+    return fmt(Str::UnitMinutes, {{"n", std::to_string(s / 60)}});
+}
+std::string showPercent(int p) { return std::to_string(p) + "%"; }
+
+// One row of the settings screen. A TABLE, like the Home menu: a new setting is one more
+// line here (plus its strings), no new screen code. The value is always an int in
+// settings.txt; `choices` are what ← → step through, in order.
+struct SettingDef {
+    Str label;
+    const char* key;
+    int fallback;
+    std::vector<int> choices;
+    std::string (*show)(int);   // value → the text on the right
+};
+
+const std::vector<SettingDef>& settingDefs() {
+    // A function-local static: built on first use, then kept. (A global vector would be
+    // built before main() – harmless here, but this way the order of construction is clear.)
+    static const std::vector<SettingDef> kDefs = {
+        {Str::SetBrightness, "brightness", 100, {10, 20, 30, 40, 50, 60, 70, 80, 90, 100}, showPercent},
+        {Str::SetSleep,      "sleep_s",    120, {30, 60, 120, 300, 600},                    showDuration},
+        {Str::SetWifiOff,    "wifi_off_s", 60,  {0, 60, 120, 300, 600},                     showDuration},
+    };
+    return kDefs;
+}
+
+// Where the stored value sits among the choices. A hand-edited value that isn't one of
+// them (sleep_s=90) maps to the first choice at or above it, so ← → still move sensibly.
+size_t choiceIndex(const SettingDef& d, int value) {
+    for (size_t i = 0; i < d.choices.size(); ++i)
+        if (d.choices[i] >= value) return i;
+    return d.choices.size() - 1;
+}
+
+// Below the values: rows that open a screen of their own. Things you set up once and
+// then rarely touch, so they live here and not on Home. The key works on the Settings screen.
+struct SettingLink {
+    Str label;
+    char shortcut;
+    void (*open)(App&);
+};
+const SettingLink kLinks[] = {
+    {Str::SetWifi,     's', openWifi},
+    {Str::SetLanguage, 'g', openLanguage},
+    {Str::SetTouch,    'p', openTouchTest},
+};
+
+}  // namespace
+
+void openSettings(App& app) {
+    auto screen = std::make_unique<ListScreen>(tr(Str::HomeSettings), std::vector<ListItem>{},
+                                               [](App&, int) {});   // Enter: see the key handler
+    screen->setRebuild([&app](ListScreen& s) {
+        // Title and hints too, not only the items: we are on the stack while the
+        // Language screen is open, and come back to a new language.
+        s.setTitle(tr(Str::HomeSettings));
+        s.setHints(tr(Str::SetHints));
+        std::vector<ListItem> items;
+        for (const SettingDef& d : settingDefs())
+            items.push_back({tr(d.label), d.show(app.settings().getInt(d.key, d.fallback))});
+        for (const SettingLink& l : kLinks) items.push_back({tr(l.label), std::string(1, l.shortcut)});
+        s.list().items = std::move(items);
+    });
+    // ← → step through the choices (stopping at the ends); Enter steps forward and wraps,
+    // so the trackball click alone can reach every value. Each change is saved at once:
+    // a key press is rare enough for an SD write, and nothing is lost if the battery dies.
+    screen->setKeyHandler([](App& a, ListScreen& s, int k) {
+        for (const SettingLink& l : kLinks)
+            if (k == l.shortcut) { l.open(a); return true; }
+        const size_t row = static_cast<size_t>(s.list().selected);
+        if (row >= settingDefs().size()) {                       // a link row
+            // ← → would PAGE the list (ListView's default) and jump to the top row, where the
+            // next ← → changes the brightness by surprise. The list fits on one screen: ignore them.
+            if (k == key::Left || k == key::Right) return true;
+            if (k != key::Enter && k != key::Select) return false;
+            kLinks[row - settingDefs().size()].open(a);
+            return true;
+        }
+        if (k != key::Left && k != key::Right && k != key::Enter && k != key::Select) return false;
+        const SettingDef& d = settingDefs()[row];
+        const size_t n = d.choices.size();
+        size_t i = choiceIndex(d, a.settings().getInt(d.key, d.fallback));
+        if (k == key::Left) i = i > 0 ? i - 1 : 0;
+        else if (k == key::Right) i = std::min(i + 1, n - 1);
+        else i = (i + 1) % n;
+        a.settings().setInt(d.key, d.choices[i]);
+        a.settings().save();
+        a.applyBacklight();       // so brightness changes are seen while choosing
+        s.rebuild();
+        return true;
+    });
+    app.push(std::move(screen));
 }
 
 void openAbout(App& app) {

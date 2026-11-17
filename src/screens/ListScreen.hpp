@@ -39,6 +39,7 @@ public:
         _list.twoLine = twoLine;
     }
 
+    void setTitle(std::string t) { _title = std::move(t); }
     void setHints(std::string h) { _hints = std::move(h); }
     void setEmptyText(std::string t) { _empty = std::move(t); }
     // A screen that stays on the stack while the language changes (the Home menu)
@@ -55,9 +56,12 @@ public:
         return _hints.empty() ? i18n::tr(i18n::Str::HintListDefault) : _hints;
     }
 
-    void onEnter(App&) override {
+    // Refill the items now (e.g. after a key changed what they show).
+    void rebuild() {
         if (_rebuild) { _rebuild(*this); _list.clampSelection(); }
     }
+
+    void onEnter(App&) override { rebuild(); }
 
     void onKey(App& app, int k) override {
         if (_onKeyExtra && _onKeyExtra(app, *this, k)) { app.redraw(); return; }

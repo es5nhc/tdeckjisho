@@ -1,6 +1,7 @@
 #include "ui/App.hpp"
 #include "core/I18n.hpp"
 
+#include <algorithm>   // std::clamp, std::min, std::max
 #include <ctime>
 
 #include "core/Paths.hpp"
@@ -25,8 +26,9 @@ void App::begin() {
     _positions.load(paths::kPositions);
     _quiz.load(paths::kQuiz);
 
-    // The language: chosen in the Language screen (home menu `g`), stored as lang=et|en|ja.
+    // The language: chosen in the Language screen (Settings → `g`), stored as lang=et|en|ja.
     i18n::setLanguage(i18n::fromCode(_settings.get("lang", "en"), i18n::Lang::En));
+    applyBacklight();   // hal::begin() switched it on at full; now the user's level
 
     // ---- dictionary --------------------------------------------------------
     // A dictionary update interrupted by a power cut is finished (or undone)
@@ -72,6 +74,54 @@ void App::applyPending() {
     applyPending();                       // in case onEnter queued something
 }
 
+bool App::wakeUp() {
+    _lastInput = _now;
+    if (_asleep) {
+        _asleep = false;
+        _dimmed = false;
+        hal::displayOn();
+        applyBacklight();                  // displayOn() switches it on at full
+        _dirty = true;
+        return true;
+    }
+    if (_dimmed) {                         // input while dimmed: back to full brightness
+        _dimmed = false;
+        applyBacklight();
+    }
+    return false;
+}
+
+uint8_t App::fullBacklight() const {
+    // Stored as a percentage so settings.txt reads naturally. Clamped: a hand-edited
+    // "brightness=0" must not give a black screen that looks like a dead device.
+    const int pct = std::clamp(_settings.getInt("brightness", 100), 5, 100);
+    return static_cast<uint8_t>(pct * 255 / 100);
+}
+
+// With auto-reconnect on, the ESP32 keeps scanning for a network that is gone (you left
+// home) forever, and the radio is one of the biggest power users on the board. So: if the
+// state has not reached Connected within `wifi_off_s` seconds of starting to connect
+// (at boot, after a lost connection, or after picking a network), switch the radio off.
+// Settings → Wi-Fi turns it on again. 0 = never give up.
+void App::checkWifiGiveUp() {
+    const hal::WifiState ws = hal::wifiState();
+    if (ws != _wifiState) {
+        if (ws == hal::WifiState::Connecting) _wifiTryingSince = _now;   // the clock starts
+        _wifiState = ws;
+    }
+    if (ws != hal::WifiState::Connecting && ws != hal::WifiState::Failed) return;
+    // The Wi-Fi screen is where the user is fixing exactly this: never pull the radio
+    // from under a scan they are watching. The minute starts again when they leave.
+    if (_stack.back()->holdsWifi()) { _wifiTryingSince = _now; return; }
+
+    const int limitS = _settings.getInt("wifi_off_s", 60);
+    if (limitS <= 0 || _now - _wifiTryingSince < static_cast<uint32_t>(limitS) * 1000u) return;
+    hal::log("[wifi] no network for %d s, switching the radio off\n", limitS);
+    hal::wifiDisconnect();
+    _wifiState = hal::WifiState::Off;
+    toast(i18n::tr(i18n::Str::WifiGaveUp), 5000);
+}
+
 void App::toast(const std::string& msg, uint32_t ms) {
     _toast = msg;
     _toastUntil = _now + ms;
@@ -86,27 +136,14 @@ void App::tick() {
 
     // 1. Input
     for (int k = hal::pollKey(); k != key::None; k = hal::pollKey()) {
-        _lastInput = _now;
-        if (_asleep) {                     // the waking key is swallowed
-            _asleep = false;
-            _dimmed = false;
-            hal::displayOn();
-            _dirty = true;
-            continue;
-        }
-        if (_dimmed) {                     // a key while dimmed: back to full brightness
-            _dimmed = false;
-            hal::setBacklight(255);
-        }
+        if (wakeUp()) continue;            // the waking key is swallowed
         _stack.back()->onKey(*this, k);
         applyPending();
     }
 
     // 1b. Taps, handled like a key: they wake the screen (and are swallowed), then reach the top screen
     for (int tx = 0, ty = 0; hal::pollTap(tx, ty);) {
-        _lastInput = _now;
-        if (_asleep) { _asleep = false; _dimmed = false; hal::displayOn(); _dirty = true; continue; }
-        if (_dimmed) { _dimmed = false; hal::setBacklight(255); }
+        if (wakeUp()) continue;
         _stack.back()->onTap(*this, tx, ty);
         applyPending();
     }
@@ -126,12 +163,19 @@ void App::tick() {
     const uint32_t idle = _now - _lastInput;
     if (!_asleep && !_dimmed && idle > sleepMs / 4 * 3) {
         _dimmed = true;
-        hal::setBacklight(40);
+        // Half of the user's level, at most 40 (about 3 of the chip's 16 steps). Never 0:
+        // that is "off", and the user would think the device died.
+        const int dim = std::min(40, fullBacklight() / 2);
+        hal::setBacklight(static_cast<uint8_t>(std::max(1, dim)));
     }
     if (!_asleep && idle > sleepMs) {
         _asleep = true;
         hal::displayOff();
     }
+
+    // Wi-Fi is checked even while the screen is off: a radio searching for a network that
+    // isn't there drains the battery whether anyone looks or not.
+    checkWifiGiveUp();
     if (_asleep) return;
 
     // 4. Status bar changes (clock minute, Wi-Fi, battery) – check once a second.

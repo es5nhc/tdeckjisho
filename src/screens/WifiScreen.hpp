@@ -24,6 +24,7 @@ public:
     void onKey(App& app, int key) override;
     void update(App& app) override;
     void draw(App& app, lgfx::LovyanGFX& g, const Rect& r) override;
+    bool holdsWifi() const override { return true; }   // no auto-off while we're open
 
 private:
     void startScan();

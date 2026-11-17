@@ -86,7 +86,7 @@ uint32_t g_clickChangedAt = 0;
 //   0x814F  first finger: 8 bytes (id, x lo, x hi, y lo, y hi, size lo, size hi, reserved)
 // After reading, write 0 to 0x814E, or the chip never reports again.
 //
-// Confirmed on real hardware (2026-11-16). Home → Touch test (p) checks it again if needed.
+// Confirmed on real hardware (2026-11-16). Settings → Touch test (p) checks it again if needed.
 constexpr int kTouchInt = 16;                    // interrupt pin: we poll instead, so only an input
 constexpr uint16_t kGtProductId = 0x8140, kGtStatus = 0x814E, kGtPoint1 = 0x814F;
 

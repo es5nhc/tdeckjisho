@@ -10,12 +10,12 @@ The version lives in **one** place, `platformio.ini`:
 ```ini
 [env]
 custom_name = tdeckjisho
-custom_version = 0.1
+custom_version = 0.1.1
 ```
 
 `tools/name_firmware.py` turns these into:
 
-- the file names `.pio/build/tdeck/tdeckjisho-0.1.bin` and `.elf`, instead of the
+- the file names `.pio/build/tdeck/tdeckjisho-0.1.1.bin` and `.elf`, instead of the
   `firmware.bin` every ESP32 project gets by default
 - the macro `JISHO_VERSION`, which the About screen shows and the HTTP `User-Agent`
   carries
@@ -164,13 +164,22 @@ while the card is out.
 
 | Key | Default | Set by | Meaning |
 |---|---|---|---|
-| `lang` | `en` | Home → Language | `et`, `en` or `ja` |
+| `lang` | `en` | Settings → Language | `et`, `en` or `ja` |
 | `font` | `16` | `f` in the reader | body text size: 12, 16, 20 |
 | `ruby` | `1` | `r` in the reader | furigana shown |
 | `dict_mode` | `0` | ← → in the search | 0 auto, 1 Japanese→English, 2 English→Japanese |
-| `sleep_s` | `120` | only by hand | seconds without input before the screen goes off; it dims at ¾ of this |
+| `brightness` | `100` | Home → Settings | full backlight level in percent (5–100); dimming goes to half of it |
+| `sleep_s` | `120` | Home → Settings | seconds without input before the screen goes off; it dims at ¾ of this |
+| `wifi_off_s` | `60` | Home → Settings | seconds of looking for a network before the radio is switched off; 0 = never |
 | `last_url` | `https://` | the web prompt | the address typed last |
 | `jmdict_url` | the EDRDG's | Update dictionary | where to download JMdict from, e.g. `http://192.168.1.10:8000/JMdict_e.gz` for a server on your PC |
+
+The settings screen (Home → Settings, `c`) is a table, `settingDefs()` in
+`src/screens/Actions.cpp`: one row per setting with its key, default and the values
+← → step through. To put a new number setting on that screen, add a row there and its
+label to `Strings.def`. Below the values, `kLinks` lists rows that open a screen of their
+own (Language, Wi-Fi, Touch test), each with a shortcut key. A value typed by hand that isn't in the list still works; the
+screen starts stepping from the nearest choice above it.
 
 To add a setting, read it with `app.settings().getInt("key", default)` or `get()`,
 change it with `set()` / `setInt()`, and call `app.settings().save()`. The save writes

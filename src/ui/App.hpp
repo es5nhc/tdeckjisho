@@ -38,6 +38,7 @@
 
 #include "core/Settings.hpp"
 #include "dict/Dictionary.hpp"
+#include "hal/Hal.hpp"
 #include "ui/Screen.hpp"
 
 class App {
@@ -62,6 +63,12 @@ public:
     Settings& quizProgress() { return _quiz; }     // quiz answer streaks per question
     uint32_t now() const { return _now; }
 
+    // ---- power -----------------------------------------------------------
+    // "Full" brightness 0..255, from the setting `brightness` (percent). Waking up and
+    // un-dimming go back to THIS, not to 255: a dimmer screen is the cheapest battery saving.
+    uint8_t fullBacklight() const;
+    void applyBacklight() { hal::setBacklight(fullBacklight()); }   // after changing the setting
+
 private:
     struct Op {
         enum Kind { Push, Pop, Replace } kind;
@@ -69,6 +76,8 @@ private:
     };
 
     void applyPending();
+    bool wakeUp();          // a key or tap arrived; true = it only woke the screen (swallow it)
+    void checkWifiGiveUp(); // radio off after `wifi_off_s` seconds without a network
     void render();
     void drawTopBar(lgfx::LovyanGFX& g);
     void drawBottomBar(lgfx::LovyanGFX& g);
@@ -92,4 +101,6 @@ private:
     uint32_t _toastUntil = 0;
     uint32_t _lastStatusCheck = 0;
     std::string _lastStatus;
+    hal::WifiState _wifiState = hal::WifiState::Off;   // as seen at the last tick
+    uint32_t _wifiTryingSince = 0;                     // when it last started Connecting
 };
