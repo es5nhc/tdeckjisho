@@ -22,10 +22,12 @@
 #include <sys/time.h>
 
 #include <cstdarg>
+#include <cstdlib>   // std::abs
 #include <ctime>
 
 #include <LovyanGFX.hpp>
 
+#include "core/Battery.hpp"
 #include "hal/Hal.hpp"
 
 namespace hal {
@@ -201,14 +203,39 @@ void displayOn() {
     setBacklight(255);
 }
 
+int batteryMillivolts() {
+    // One ADC reading is noisy (tens of mV), and the backlight and Wi-Fi make the
+    // voltage itself wobble. So: at most one new measurement a second, each the
+    // average of 16 readings, then an exponential moving average over ~8 s.
+    static uint32_t lastMs = 0;
+    static int32_t avg8 = -1;              // the smoothed value x 8 (keeps the fractions)
+    const uint32_t now = millis();
+    if (avg8 >= 0 && now - lastMs < 1000) return avg8 / 8;
+    lastMs = now;
+
+    uint32_t sum = 0;
+    for (int i = 0; i < 16; ++i) sum += analogReadMilliVolts(kPinBattery);
+    // The 1:2 divider (2 x 100 kΩ) halves the voltage so 4.2 V fits the ADC range.
+    // analogReadMilliVolts() uses the chip's factory calibration, but on the T-Deck it
+    // still reads low, so we multiply by 2.11 instead of 2. The factor comes from
+    // Meshtastic's T-Deck variant: ADC_MULTIPLIER 2.11, "2.0 + 10% for correction of
+    // display undervoltage" (variants/esp32s3/t-deck/variant.h, commit 6d41e27, see
+    // docs/04-hardware.md). Integer maths: x 211 / 100.
+    const int32_t mv = static_cast<int32_t>(sum / 16) * 211 / 100;
+    if (mv < 1000) {                       // no battery connected
+        avg8 = -1;
+        return -1;
+    }
+    // First reading, or a jump too big to be discharge (battery swapped, USB
+    // plugged in): start again from the new value instead of drifting towards it.
+    if (avg8 < 0 || std::abs(mv - avg8 / 8) > 300) avg8 = mv * 8;
+    else avg8 += mv - avg8 / 8;            // new = old + (sample - old) / 8, in x8 units
+    return avg8 / 8;
+}
+
 int batteryPercent() {
-    // The divider halves the voltage so 4.2 V fits the ADC range.
-    // analogReadMilliVolts() uses the chip's factory calibration.
-    const uint32_t mv = analogReadMilliVolts(kPinBattery) * 2;
-    if (mv < 1000) return -1;                       // no battery connected
-    // Li-ion: ~3.3 V empty, ~4.2 V full. Linear is a rough but honest guess.
-    const int pct = static_cast<int>((static_cast<int>(mv) - 3300) * 100 / (4200 - 3300));
-    return pct < 0 ? 0 : pct > 100 ? 100 : pct;
+    const int mv = batteryMillivolts();
+    return mv < 0 ? -1 : battery::percentFromMillivolts(mv);
 }
 
 bool timeValid() {

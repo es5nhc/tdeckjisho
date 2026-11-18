@@ -86,7 +86,8 @@ void setBacklight(uint8_t) {}               // a PC window has no backlight to d
 void displayOff() { sdlDisplay().fillScreen(TFT_BLACK); }
 void displayOn() {}                          // App redraws a full frame anyway
 
-int batteryPercent() { return -1; }          // a PC has no battery we care about
+int batteryMillivolts() { return -1; }       // a PC has no battery we care about
+int batteryPercent() { return -1; }
 
 bool timeValid() { return true; }            // the PC clock is always set
 

@@ -24,6 +24,7 @@
 #include <cstdio>
 #include <string>
 
+#include "core/Battery.hpp"
 #include "core/Deinflect.hpp"
 #include "core/I18n.hpp"
 #include "core/Romaji.hpp"
@@ -306,6 +307,22 @@ static void testSettingsRoundTrip() {
 }
 
 // The network policy, and secrets that must not grow extra lines.
+static void testBattery() {
+    using battery::percentFromMillivolts;
+    CHECK(percentFromMillivolts(4300) == 100);   // above the table (charging)
+    CHECK(percentFromMillivolts(4190) == 100);
+    CHECK(percentFromMillivolts(3800) == 60);    // exactly on a table point
+    CHECK(percentFromMillivolts(3760) == 55);    // halfway between 3800 and 3720
+    CHECK(percentFromMillivolts(3300) == 10);
+    CHECK(percentFromMillivolts(3100) == 0);
+    CHECK(percentFromMillivolts(2500) == 0);     // below the table
+    for (int mv = 3000, prev = 0; mv <= 4300; mv += 5) {   // never goes down as mv goes up
+        const int p = percentFromMillivolts(mv);
+        CHECK(p >= prev && p <= 100);
+        prev = p;
+    }
+}
+
 static void testNetPolicy() {
     CHECK(url::isWebUrl("https://www.err.ee/"));
     CHECK(url::isWebUrl("HTTP://example.com/"));
@@ -850,6 +867,7 @@ int main() {
     testFeed();
     testLayout();
     testSettingsRoundTrip();
+    testBattery();
     testNetPolicy();
     testRubyLayout();
     testDictionary();

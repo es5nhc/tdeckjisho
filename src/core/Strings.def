@@ -267,6 +267,8 @@ X(AboutRam,         "Vaba RAM: {i} KB sisemine, {p} / {t} KB PSRAM",
 X(AboutSd,          "SD-kaart: {state}", "SD card: {state}", "SDカード: {state}")
 X(AboutSdOk,        "OK", "OK", "OK")
 X(AboutSdMissing,   "ei leitud", "not found", "見つかりません")
+X(AboutBattery,     "Aku: {v} V ({p} %)", "Battery: {v} V ({p} %)", "バッテリー: {v} V ({p} %)")
+X(AboutBatteryNone, "Aku: puudub", "Battery: none", "バッテリー: なし")
 X(AboutWifi,        "Wi-Fi: {state}", "Wi-Fi: {state}", "Wi-Fi: {state}")
 X(AboutWifiOff,     "väljas", "off", "オフ")
 X(AboutCredits,     "Tänusõnad", "Credits", "クレジット")

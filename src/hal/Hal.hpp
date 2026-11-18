@@ -76,7 +76,10 @@ void setBacklight(uint8_t level);   // 0 = off, 255 = full (used for dimming)
 void displayOff();
 void displayOn();
 
-// Battery charge 0..100, or -1 if unknown (PC, or no battery connected).
+// Battery voltage in millivolts, smoothed over a few seconds; -1 if unknown
+// (PC, or no battery connected). On USB this is the charging voltage.
+int batteryMillivolts();
+// Battery charge 0..100 from that voltage (core/Battery.hpp), or -1 if unknown.
 int batteryPercent();
 
 // True once the wall clock is trustworthy (NTP synced on device; always on PC).

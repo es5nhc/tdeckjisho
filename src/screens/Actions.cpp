@@ -1,6 +1,7 @@
 #include "screens/Actions.hpp"
 
 #include <algorithm>  // std::min
+#include <cstdio>     // snprintf
 #include <memory>
 
 #include "core/I18n.hpp"
@@ -574,6 +575,14 @@ void openAbout(App& app) {
                                {"t", std::to_string(m.totalPsram / 1024)}}));
     b.paragraph(rt::BULLET);
     b.text(fmt(Str::AboutSd, {{"state", tr(hal::storageReady() ? Str::AboutSdOk : Str::AboutSdMissing)}}));
+    b.paragraph(rt::BULLET);
+    if (const int mv = hal::batteryMillivolts(); mv >= 0) {
+        char volts[16];
+        snprintf(volts, sizeof volts, "%d.%02d", mv / 1000, mv % 1000 / 10);
+        b.text(fmt(Str::AboutBattery, {{"v", volts}, {"p", std::to_string(hal::batteryPercent())}}));
+    } else {
+        b.text(tr(Str::AboutBatteryNone));
+    }
     b.paragraph(rt::BULLET);
     b.text(fmt(Str::AboutWifi, {{"state", hal::wifiState() == hal::WifiState::Connected
                                               ? hal::wifiSsid() + " " + hal::wifiIp()

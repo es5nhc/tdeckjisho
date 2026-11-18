@@ -164,9 +164,37 @@ mapping on your own device.
 
 ## Battery and clock
 
-`batteryPercent()` doubles the ADC reading (the divider halves the voltage) and maps
-3.3 V–4.2 V linearly to 0–100 %. A Li-ion cell's voltage isn't linear in its charge, so
-treat the number as a rough guide. Below 1 V the code assumes no battery is connected.
+`batteryMillivolts()` averages 16 ADC readings and multiplies the result by 2.11: 2
+because the divider halves the voltage, plus a correction because the T-Deck's ADC reads
+low (see below). It takes at most one new measurement a second and smooths over about
+eight seconds, so the status bar doesn't flicker when the backlight or Wi-Fi changes the
+load. Below 1 V the code assumes no battery is connected.
+
+`batteryPercent()` turns that voltage into a percentage with `battery::percentFromMillivolts()`
+(`core/Battery.cpp`). A Li-ion cell's voltage isn't linear in its charge: it falls
+quickly from 4.2 V, stays flat around 3.6–3.9 V for most of the charge, then drops
+steeply below about 3.5 V. So the code uses a table of eleven points, one every 10 %,
+and draws straight lines between them:
+
+| % | 100 | 90 | 80 | 70 | 60 | 50 | 40 | 30 | 20 | 10 | 0 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| mV | 4190 | 4050 | 3990 | 3890 | 3800 | 3720 | 3630 | 3530 | 3420 | 3300 | 3100 |
+
+**Source:** the default LiPo curve (`OCV_ARRAY`) in the Meshtastic firmware's
+[`src/power.h`](https://github.com/meshtastic/firmware/blob/6d41e279f1f51bd59f687b9d441c1bf47b1594fc/src/power.h)
+(checked 2026-11-18). Meshtastic's T-Deck variant doesn't override it. We took only these
+numbers, not any code (Meshtastic is GPL-3.0). We found no curve measured on the T-Deck's
+own battery, so this is a generic LiPo curve, not a calibration. The numbers are
+*open-circuit* voltages, measured with the cell at rest. In use the voltage sags a little,
+and on USB the charger pushes it up, so the percentage reads slightly low in use and too
+high while charging.
+
+The 2.11 factor also comes from Meshtastic: their T-Deck variant uses
+`ADC_MULTIPLIER 2.11`, "2.0 + 10% for correction of display undervoltage"
+([`variants/esp32s3/t-deck/variant.h`](https://github.com/meshtastic/firmware/blob/6d41e279f1f51bd59f687b9d441c1bf47b1594fc/variants/esp32s3/t-deck/variant.h),
+same commit). The **About** screen (Home → `a`) shows the measured voltage next to the
+percentage, so if your device reads differently from a multimeter on the battery, change
+the factor in `Board.cpp`.
 
 The clock starts at 1970 on every boot. Once Wi-Fi connects, SNTP sets it from
 `pool.ntp.org`, and the status bar shows the time only after that
