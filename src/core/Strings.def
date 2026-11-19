@@ -42,7 +42,7 @@ X(ErrorLabel,       "Viga:", "Error:", "エラー:")
 X(NoSdCard,         "SD-kaarti pole", "No SD card", "SDカードがありません")
 X(NotConnectedOpenWifi, "Pole ühendatud – ühendu kõigepealt Wi-Fi võrku",
                         "Not connected – please connect to Wi-Fi first",
-                        "未接続 – Wi-Fiに接続してくださし")
+                        "未接続 – Wi-Fiに接続してください")
 
 // ---- home menu ----------------
 X(HomeHints,        "↑↓ vali   Enter ava",
@@ -294,7 +294,7 @@ X(QuizHintsDone,    "Lõpetamiseks vajuta Enter", "Press Enter to return to the 
 X(QuizAskReading,   "Kuidas seda sõna loetakse?", "How is this word read?", "この言葉の読み方は？")
 X(QuizAskMeaning,   "Mida see sõna tähendab?", "What does this word mean?", "この言葉の意味は？")
 X(QuizAskJapanese,  "Milline jaapani sõna see on?", "Which Japanese word is this?", "これは日本語でどうですか？")
-X(QuizAskKanji,     "Kuidas seda sõna kirjutatakse?", "How is this word written?", "この言葉の漢字はどうですか？")
+X(QuizAskKanji,     "Kuidas seda sõna kirjutatakse?", "How is this word written?", "この言葉の漢字は？")
 X(QuizCorrect,      "Õige!", "Correct!", "正解！")
 X(QuizWrong,        "Vale", "Wrong", "不正解")
 X(QuizScore,        "{score} / {total}", "{score} / {total}", "{score} / {total}")
