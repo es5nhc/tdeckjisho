@@ -26,6 +26,7 @@ uint32_t hal::millis() {
 }
 
 bool hal::timeValid() { return true; }
+void hal::setTimeZone(const std::string&) {}
 
 // Secrets live in memory here: tests must never touch the real NVS or ./.jisho-secrets.
 #include <map>

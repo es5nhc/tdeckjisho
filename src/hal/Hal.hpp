@@ -85,6 +85,10 @@ int batteryPercent();
 // True once the wall clock is trustworthy (NTP synced on device; always on PC).
 bool timeValid();
 
+// The time zone for std::localtime() and the clock: a POSIX TZ string such as
+// "LOC-9" (UTC+9). core/TimeZone.hpp builds it from the `tz_min` setting.
+void setTimeZone(const std::string& posixTz);
+
 struct MemInfo {
     uint32_t freeInternal = 0;   // fast on-chip RAM (~300 KB on ESP32-S3)
     uint32_t freePsram    = 0;   // slower external RAM (8 MB on T-Deck)

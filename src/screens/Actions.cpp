@@ -7,6 +7,7 @@
 #include "core/I18n.hpp"
 #include "core/Paths.hpp"
 #include "core/Str.hpp"
+#include "core/TimeZone.hpp"
 #include "core/Url.hpp"
 #include "core/Utf8.hpp"
 #include "hal/Hal.hpp"
@@ -453,6 +454,7 @@ const std::vector<SettingDef>& settingDefs() {
         {Str::SetBrightness, "brightness", 100, {10, 20, 30, 40, 50, 60, 70, 80, 90, 100}, showPercent},
         {Str::SetSleep,      "sleep_s",    120, {30, 60, 120, 300, 600},                    showDuration},
         {Str::SetWifiOff,    "wifi_off_s", 60,  {0, 60, 120, 300, 600},                     showDuration},
+        {Str::SetTimeZone,   "tz_min",     0,   tz::choices(),                           tz::label},
     };
     return kDefs;
 }
@@ -519,6 +521,7 @@ void openSettings(App& app) {
         a.settings().setInt(d.key, d.choices[i]);
         a.settings().save();
         a.applyBacklight();       // so brightness changes are seen while choosing
+        a.applyTimeZone();        // and the status bar clock moves at once
         s.rebuild();
         return true;
     });

@@ -29,6 +29,7 @@
 #include "core/I18n.hpp"
 #include "core/Romaji.hpp"
 #include "core/Settings.hpp"
+#include "core/TimeZone.hpp"
 #include "core/Url.hpp"
 #include "core/WifiStore.hpp"
 #include "core/Utf8.hpp"
@@ -321,6 +322,23 @@ static void testBattery() {
         CHECK(p >= prev && p <= 100);
         prev = p;
     }
+}
+
+static void testTimeZone() {
+    CHECK(tz::posix(540) == "LOC-9");             // Japan: POSIX's sign is the opposite
+    CHECK(tz::posix(-300) == "LOC5");
+    CHECK(tz::posix(330) == "LOC-5:30");
+    CHECK(tz::posix(-210) == "LOC3:30");
+    CHECK(tz::posix(0) == "LOC0");
+    CHECK(tz::posix(99999) == "LOC-14");          // a hand-edited value is clamped
+    CHECK(tz::label(540) == "UTC+9");
+    CHECK(tz::label(345) == "UTC+5:45");
+    CHECK(tz::label(-570) == "UTC-9:30");
+    CHECK(tz::label(0) == "UTC");
+    // Settings' ← → need the choices in ascending order (choiceIndex in Actions.cpp).
+    const auto& c = tz::choices();
+    CHECK(c.front() == -720 && c.back() == 840);
+    CHECK(std::is_sorted(c.begin(), c.end()) && std::adjacent_find(c.begin(), c.end()) == c.end());
 }
 
 static void testNetPolicy() {
@@ -868,6 +886,7 @@ int main() {
     testLayout();
     testSettingsRoundTrip();
     testBattery();
+    testTimeZone();
     testNetPolicy();
     testRubyLayout();
     testDictionary();

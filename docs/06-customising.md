@@ -171,6 +171,7 @@ while the card is out.
 | `brightness` | `100` | Home → Settings | full backlight level in percent (5–100); dimming goes to half of it |
 | `sleep_s` | `120` | Home → Settings | seconds without input before the screen goes off; it dims at ¾ of this |
 | `wifi_off_s` | `60` | Home → Settings | seconds of looking for a network before the radio is switched off; 0 = never |
+| `tz_min` | `0` | Home → Settings | the clock's offset from UTC in minutes (`540` = UTC+9, Japan); no summer time, so change it twice a year where clocks switch |
 | `last_url` | `https://` | the web prompt | the address typed last |
 | `jmdict_url` | the EDRDG's | Update dictionary | where to download JMdict from, e.g. `http://192.168.1.10:8000/JMdict_e.gz` for a server on your PC |
 
@@ -192,7 +193,7 @@ Reading positions go to a separate file, `positions.txt`, with the same format.
 
 | What | Where |
 |---|---|
-| Time zone (the clock) | **two places**: `setenv("TZ", …)` in `hal/tdeck/Board.cpp` and `configTzTime(…)` in `hal/tdeck/Net.cpp`. A POSIX TZ string; Estonia's is `EET-2EEST,M3.5.0/3,M10.5.0/4` |
+| Time zone (the clock) | the `tz_min` setting; the offsets on offer, and how one becomes a POSIX TZ string, are in `core/TimeZone.cpp` |
 | NTP servers | `configTzTime(…)` in `hal/tdeck/Net.cpp` |
 | Trackball sensitivity | `kTrackballThreshold` in `hal/tdeck/Input.cpp` |
 | How long the search waits after a key | `kDebounceMs` in `screens/SearchScreen.cpp` |

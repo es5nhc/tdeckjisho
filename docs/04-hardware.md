@@ -46,7 +46,8 @@ swapped on your device, check `kPinUp` and friends at the top of `Input.cpp` fir
 3. **Display.** LovyanGFX sets up the SPI bus here.
 4. **SD card.** It joins the bus the display just set up.
 5. **Keyboard, trackball and touch.**
-6. **Time zone** (`TZ` for Estonia), and the ADC for the battery.
+6. The ADC for the battery. (The time zone comes later, from the settings:
+   `App::begin()` calls `hal::setTimeZone()`.)
 
 ## The shared SPI bus
 
@@ -198,8 +199,9 @@ the factor in `Board.cpp`.
 
 The clock starts at 1970 on every boot. Once Wi-Fi connects, SNTP sets it from
 `pool.ntp.org`, and the status bar shows the time only after that
-(`hal::timeValid()`). The time zone is a POSIX `TZ` string, set in two places (chapter
-06).
+(`hal::timeValid()`). The time zone is a POSIX `TZ` string, built from the `tz_min`
+setting by `core/TimeZone.cpp` (chapter 06). `configTzTime()` sets `TZ` too, so
+`hal/tdeck/Net.cpp` passes it the one already set.
 
 ## Launcher and the flash layout
 

@@ -68,6 +68,7 @@ public:
     // un-dimming go back to THIS, not to 255: a dimmer screen is the cheapest battery saving.
     uint8_t fullBacklight() const;
     void applyBacklight() { hal::setBacklight(fullBacklight()); }   // after changing the setting
+    void applyTimeZone();                                            // likewise, `tz_min`
 
 private:
     struct Op {

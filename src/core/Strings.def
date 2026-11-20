@@ -66,6 +66,7 @@ X(SetHints,         "↑↓ vali   ← → muuda   Enter ava   BS",
 X(SetBrightness,    "Ekraani heledus", "Screen brightness", "画面の明るさ")
 X(SetSleep,         "Ekraan kustub automaatselt", "Screen off after", "画面オフまで")
 X(SetWifiOff,       "Wi-Fi välja võrgu puududes", "Disable Wi-Fi if no network", "圏外でWi-Fiをオフにする")
+X(SetTimeZone,      "Ajavöönd", "Time zone", "タイムゾーン")
 X(SetLanguage,      "Keel", "Language", "言語")
 X(SetWifi,          "Wi-Fi seaded", "Wi-Fi settings", "Wi-Fi設定")
 X(SetTouch,         "Puutetest", "Touch test", "タッチテスト")

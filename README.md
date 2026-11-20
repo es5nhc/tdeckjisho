@@ -39,8 +39,8 @@ including the touchscreen. The UI is in Estonian, English and Japanese. Use at y
   子グマ → 子熊) and counters after a number (3人 → にん).
 - **News** (RSS 2.0 and Atom) and a **reader-mode web browser**.
 - **Wi-Fi:** scan, connect, remember networks, NTP clock.
-- **Settings** (Home → `c`): screen brightness, screen timeout, and switching Wi-Fi off
-  when no network is found, to save battery. The language, Wi-Fi setup and the touch test
+- **Settings** (Home → `c`): screen brightness, screen timeout, switching Wi-Fi off
+  when no network is found (to save battery), and the clock's time zone as a UTC offset. The language, Wi-Fi setup and the touch test
   are here too.
 
 ## Quick start: the PC simulator

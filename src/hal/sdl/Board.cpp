@@ -5,6 +5,8 @@
 #include <chrono>
 #include <cstdarg>
 #include <cstdio>
+#include <cstdlib>   // setenv
+#include <ctime>     // tzset
 #include <thread>
 
 #include <LovyanGFX.hpp>
@@ -90,6 +92,12 @@ int batteryMillivolts() { return -1; }       // a PC has no battery we care abou
 int batteryPercent() { return -1; }
 
 bool timeValid() { return true; }            // the PC clock is always set
+
+// Same as on the device: the simulator's clock follows the setting, not the PC's zone.
+void setTimeZone(const std::string& posixTz) {
+    setenv("TZ", posixTz.c_str(), 1);
+    tzset();
+}
 
 MemInfo memInfo() { return MemInfo{}; }      // not meaningful on a PC
 

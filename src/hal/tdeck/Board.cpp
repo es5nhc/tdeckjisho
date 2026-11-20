@@ -158,11 +158,7 @@ void begin() {
     // 4. Keyboard and trackball.
     inputBegin();
 
-    // 5. Time zone for the clock. POSIX TZ string for Estonia:
-    //    EET = UTC+2, EEST summer time from last Sunday of March 03:00 to
-    //    last Sunday of October 04:00.
-    setenv("TZ", "EET-2EEST,M3.5.0/3,M10.5.0/4", 1);
-    tzset();
+    // 5. The time zone is set later, by App::begin() from the settings (hal::setTimeZone).
 
     analogReadResolution(12);
     log("[hal] T-Deck ready, PSRAM %u KB free\n",
@@ -236,6 +232,13 @@ int batteryMillivolts() {
 int batteryPercent() {
     const int mv = batteryMillivolts();
     return mv < 0 ? -1 : battery::percentFromMillivolts(mv);
+}
+
+void setTimeZone(const std::string& posixTz) {
+    // The C library reads TZ from the environment; tzset() makes it look again.
+    // hal/tdeck/Net.cpp passes the same variable on to SNTP.
+    setenv("TZ", posixTz.c_str(), 1);
+    tzset();
 }
 
 bool timeValid() {

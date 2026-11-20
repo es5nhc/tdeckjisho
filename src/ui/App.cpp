@@ -5,6 +5,7 @@
 #include <ctime>
 
 #include "core/Paths.hpp"
+#include "core/TimeZone.hpp"
 #include "dict/DictBuilder.hpp"
 #include "core/WifiStore.hpp"
 #include "hal/Hal.hpp"
@@ -29,6 +30,7 @@ void App::begin() {
     // The language: chosen in the Language screen (Settings → `g`), stored as lang=et|en|ja.
     i18n::setLanguage(i18n::fromCode(_settings.get("lang", "en"), i18n::Lang::En));
     applyBacklight();   // hal::begin() switched it on at full; now the user's level
+    applyTimeZone();    // before Wi-Fi: NTP takes the zone that is set when it starts
 
     // ---- dictionary --------------------------------------------------------
     // A dictionary update interrupted by a power cut is finished (or undone)
@@ -49,6 +51,10 @@ void App::begin() {
 // ---------------------------------------------------------------------------
 //  Navigation
 // ---------------------------------------------------------------------------
+void App::applyTimeZone() {
+    hal::setTimeZone(tz::posix(_settings.getInt("tz_min", 0)));
+}
+
 void App::push(std::unique_ptr<Screen> s) { _pending.push_back({Op::Push, std::move(s)}); }
 void App::pop() { _pending.push_back({Op::Pop, nullptr}); }
 void App::replace(std::unique_ptr<Screen> s) { _pending.push_back({Op::Replace, std::move(s)}); }

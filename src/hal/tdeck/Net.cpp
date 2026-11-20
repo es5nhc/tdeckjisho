@@ -23,6 +23,7 @@
 #include "ca_bundle.h"   // kCaBundle, kCaBundleCerts: generated at build time
 
 #include <algorithm>   // std::min
+#include <cstdlib>   // std::getenv
 #include <ctime>
 
 #include "core/Url.hpp"
@@ -114,8 +115,10 @@ WifiState wifiState() {
         }
         if (!g_ntpStarted) {
             // Ask NTP servers for the time; the ESP-IDF SNTP client keeps it
-            // in sync from now on. Uses the TZ set in hal::begin().
-            configTzTime("EET-2EEST,M3.5.0/3,M10.5.0/4", "pool.ntp.org", "time.google.com");
+            // in sync from now on. configTzTime() also SETS TZ, so hand it the one
+            // hal::setTimeZone() set from the settings, not a fixed zone.
+            const char* tz = std::getenv("TZ");
+            configTzTime(tz ? tz : "UTC0", "pool.ntp.org", "time.google.com");
             g_ntpStarted = true;
         }
     } else if (g_state == WifiState::Connected) {
